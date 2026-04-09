@@ -1,0 +1,114 @@
+const db = require('../config/db');
+const QRcode = require('qrcode');
+
+// añadir vehiculo y crear el qr 
+const crearVehiculo = async (req, res) => {
+    try {
+        const { placa, marca, modelo, color, tipo } = req.body;
+
+        const usuario_id = req.usuario.id;
+
+        // 1. verifucar que la placa no existe
+        const [existe] = await db.query(
+            'SELECT id FROM vehiculos WHERE placa = ?',
+            [placa]
+        );
+        if (existe.length > 0) {
+            return res.status(400).json({ mensaje: 'esa placa ya fue registrada' });
+        }
+
+        const [conteo] = await db.query(
+            'SELECT COUNT(*) as total FROM vehiculos WHERE usuario_id =?',
+            [usuario_id]
+        );
+        if (conteo[0].total >= 3) {
+            return res.status(400).json({
+                mensaje: 'Limite alcanzado, Maximo de 3 vehiculos por usuario. contacta al administrador para eliminar un vehiculo.'
+            });
+        };
+        // 2. crear el qr con los datos del vehiculos
+        // el qr contiene un json con la informacion revelante 
+        const datosQR = JSON.stringify({ placa, usuario_id });
+        const qrImagen = await QRcode.toDataURL(datosQR);
+
+        // 3. guardar en la base de datos
+        const [resultado] = await db.query(
+            `INSERT INTO vehiculos (placa, marca, modelo, color, tipo, usuario_id, qr_code)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [placa, marca, modelo, color, tipo, usuario_id, qrImagen]
+        );
+
+        res.status(201).json({
+            mensaje: 'vehiculos registrados exitosamente',
+            vehiculo_id: resultado.insertId,
+            qr_code: qrImagen
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'error en el servidor' });
+    }
+};
+
+// obtener la informacion del vehiculo del usuario
+
+const misVehiculos = async (req, res) => {
+    try {
+        const usuario_id = req.usuario.id;
+        const [vehiculos] = await db.query(
+            'SELECT id, placa, marca, modelo, color, tipo, qr_code, created_at FROM vehiculos WHERE usuario_id = ?',
+            [usuario_id]
+        );
+        res.json(vehiculos);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error del servidor' });
+    }
+};
+
+// buscar vehiculo por la placa (esto es para el celador)
+const buscarPorPlaca = async (req, res) => {
+    try {
+        const { placa } = req.params;
+        const [resultado] = await db.query(
+            'SELECT v.*, u.nombre, u.email FROM vehiculos v JOIN usuarios u ON v.usuario_id = u.id WHERE v.placa =?',
+            [placa]
+        );
+        if (resultado.length === 0) {
+            return res.status(404).json({ mensaje: 'vehiculo no encontrado' });
+        }
+        res.json(resultado[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error del servidor' });
+    }
+};
+
+// eliminar vehiculo (solo lo hace los administradores)
+const eliminarVehiculo = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const usuario = req.usuario;
+        // verificar si existe el vehiculo 
+        const [vehiculos] = await db.query(
+            'SELECT * FROM vehiculos WHERE id =?', [id]);
+        if (vehiculos.length === 0) {
+            return res.status(404).json({ mensaje: 'vehiculo no encontrado' });
+        }
+        const vehiculo = vehiculos[0];
+
+
+        // eliminar el vehiculo 
+        if (usuario.role !== 'admin') {
+            return res.status(403).json({ mensaje: 'Solo los administradores pueden eliminar vehiculos' });
+        }
+
+        await db.query('DELETE FROM vehiculos WHERE id= ?', [id]);
+        res.json({mensaje:'Vehiculo eliminado exitosamente'});
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error en el servidor' });
+    }
+};
+
+
+module.exports = { crearVehiculo, misVehiculos, buscarPorPlaca, eliminarVehiculo };
