@@ -88,22 +88,44 @@ const eliminarVehiculo = async (req, res) => {
     try {
         const { id } = req.params;
         const usuario = req.usuario;
-        // verificar si existe el vehiculo 
+
         const [vehiculos] = await db.query(
-            'SELECT * FROM vehiculos WHERE id =?', [id]);
+            'SELECT * FROM vehiculos WHERE id = ?', [id]
+        );
+
         if (vehiculos.length === 0) {
-            return res.status(404).json({ mensaje: 'vehiculo no encontrado' });
+            return res.status(404).json({ mensaje: 'Vehículo no encontrado' });
         }
+
         const vehiculo = vehiculos[0];
 
-
-        // eliminar el vehiculo 
-        if (usuario.role !== 'admin') {
-            return res.status(403).json({ mensaje: 'Solo los administradores pueden eliminar vehiculos' });
+        if (usuario.role === 'user' && vehiculo.usuario_id !== usuario.id) {
+            return res.status(403).json({ mensaje: 'No tienes permiso para eliminar este vehículo' });
         }
 
-        await db.query('DELETE FROM vehiculos WHERE id= ?', [id]);
-        res.json({mensaje:'Vehiculo eliminado exitosamente'});
+        // 1. Buscar registros del vehículo
+        const [registrosVehiculo] = await db.query(
+            'SELECT * FROM registros WHERE vehiculo_id = ?', [id]
+        );
+
+        // 2. Guardar cada registro en papelera
+        for (const registro of registrosVehiculo) {
+            await db.query(
+                'INSERT INTO papelera (tabla_origen, datos, eliminado_por) VALUES (?, ?, ?)',
+                ['registros', JSON.stringify(registro), usuario.id]
+            );
+        }
+
+        // 3. Guardar vehículo en papelera
+        await db.query(
+            'INSERT INTO papelera (tabla_origen, datos, eliminado_por) VALUES (?, ?, ?)',
+            ['vehiculos', JSON.stringify(vehiculo), usuario.id]
+        );
+
+        // 4. Eliminar el vehículo
+        await db.query('DELETE FROM vehiculos WHERE id = ?', [id]);
+        res.json({ mensaje: 'Vehículo eliminado exitosamente' });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ mensaje: 'Error en el servidor' });

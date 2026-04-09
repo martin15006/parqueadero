@@ -5,12 +5,13 @@ import api from '../api/axios';
 
 export default function Dashboard() {
     const [vehiculos, setVehiculos] = useState([]);
-    const [form, setForm] = useState({ placa: '', marca: '', modelo: '', color: '' });
+    const [form, setForm] = useState({ placa: '', marca: '', modelo: '', color: '', tipo: 'carro' });
     const [qrActual, setQrActual] = useState('');
     const [error, setError] = useState('');
     const [exito, setExito] = useState('');
     const navigate = useNavigate();
     const [PlacaActual, setPlacaActual] = useState('');
+    const esAdmin = JSON.parse(localStorage.getItem('usuario') || '{}').role === 'admin';
 
     useEffect(() => {
         if (!localStorage.getItem('token')) {
@@ -31,7 +32,7 @@ export default function Dashboard() {
 
     const eliminarVehiculo = async (id) => {
         const confirmar = window.confirm('¿seguro que quieres eliminar este vehiculo?');
-        if(!confirmar) return;
+        if (!confirmar) return;
         try {
             await api.delete(`/vehiculos/${id}`);
             cargarVehiculos();
@@ -130,7 +131,7 @@ export default function Dashboard() {
                                     <th>Color</th>
                                     <th>Tipo</th>
                                     <th>QR</th>
-                                    <th>Eliminar</th>
+                                    {esAdmin && <th>Eliminar</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -147,7 +148,10 @@ export default function Dashboard() {
                                                 setPlacaActual(v.placa);
                                             }}>Ver QR</button>
                                         </td>
-                                        <td><button className="btn btn-danger btn-sm" onClick={() => { eliminarVehiculo(v.id) }}>Eliminar</button></td>
+                                        {esAdmin && (
+                                            <td>
+                                                <button className="btn btn-danger btn-sm" onClick={() => { eliminarVehiculo(v.id) }}>Eliminar</button>
+                                            </td>)}
                                     </tr>
                                 ))}
                             </tbody>

@@ -95,9 +95,12 @@ export default function Admin() {
                             <tr>
                                 <th>Tipo</th>
                                 <th>Placa</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
                                 <th>Propietario</th>
                                 <th>Celador</th>
                                 <th>Fecha</th>
+                                <th>Eliminar</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -109,9 +112,27 @@ export default function Admin() {
                                             : '🔴 Salida'}
                                     </td>
                                     <td>{r.placa?.trim()}</td>
+                                    <td>{r.marca?.trim()}</td>
+                                    <td>{r.modelo?.trim()}</td>
                                     <td>{r.propietario?.trim()}</td>
                                     <td>{r.celador?.trim() || '-'}</td>
                                     <td>{new Date(r.fecha).toLocaleString()}</td>
+                                    <td>
+                                        <button
+                                            className="btn btn-danger btn-sm"
+                                            onClick={async () => {
+                                                if (window.confirm('¿Eliminar este registro del historial?')) {
+                                                    try {
+                                                        await api.delete(`/registros/${r.id}`);
+                                                        cargarDatos();
+                                                    } catch {
+                                                        alert('Error al eliminar');
+                                                    }
+                                                }
+                                            }}>
+                                            Eliminar
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
