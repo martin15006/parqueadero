@@ -2,11 +2,16 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import api from "../api/axios";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 export default function Admin() {
     const [usuarios, setUsuarios] = useState([]);
     const [historial, setHistorial] = useState([]);
     const [vehiculos, setVehiculos] = useState([]);
+    const [estadisticas, setEstadisticas] = useState(null);
+    const [filtros, setFiltros] = useState({ placa: '', tipo: '', fecha_inicio: '', fecha_fin: '' });
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -21,27 +26,105 @@ export default function Admin() {
 
     const cargarDatos = async () => {
         try {
-            const [resUsuarios, resHistorial] = await Promise.all([
+            const resEstadisticas = await api.get('/registros/estadisticas');
+            const [resUsuarios, resVehiculos] = await Promise.all([
                 api.get('/usuarios'),
-                api.get('/registros'),
+                api.get('/usuarios/vehiculos'),
             ]);
             setUsuarios(resUsuarios.data);
-            setHistorial(resHistorial.data);
-
-            const resVehiculos = await api.get('/usuarios/vehiculos');
             setVehiculos(resVehiculos.data);
+            setEstadisticas(resEstadisticas.data);
+            await cargarHistorial();
         } catch (err) {
             setError('Error al cargar los datos');
         }
     };
 
+    const cargarHistorial = async () => {
+        try {
+            const params = new URLSearchParams();
+            if (filtros.placa) params.append('placa', filtros.placa);
+            if (filtros.tipo) params.append('tipo', filtros.tipo);
+            if (filtros.fecha_inicio) params.append('fecha_inicio', filtros.fecha_inicio);
+            if (filtros.fecha_fin) params.append('fecha_fin', filtros.fecha_fin);
+
+            const res = await api.get(`/registros?${params.toString()}`);
+            setHistorial(res.data);
+        } catch (err) {
+            setError('Error al cargar historial');
+        }
+    };
+
+    const exportarExcel = () => {
+        const datos = historial.map(r => ({
+            'Tipo': r.tipo_registro,
+            'Placa': r.placa,
+            'Marca': r.marca,
+            'Propietario': r.propietario,
+            'Celador': r.celador || '-',
+            'Fecha': new Date(r.fecha).toLocaleString()
+        }));
+
+        const hoja = XLSX.utils.json_to_sheet(datos);
+        const libro = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(libro, hoja, 'Historial');
+        const buffer = XLSX.write(libro, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([buffer], { type: 'application/octet-stream' });
+        saveAs(blob, `historial_parqueadero_${new Date().toLocaleDateString()}.xlsx`);
+    };
+
     return (
+
+
         <>
             <Navbar />
             <div className="pagina">
                 <h1>Panel Administrador</h1>
 
                 {error && <div className="alerta alerta-error">{error}</div>}
+
+                {estadisticas && (
+                    <>
+                        {/* tarjetas  */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                            {[
+                                { label: '🚗 Adentro ahora', valor: estadisticas.adentro, color: '#2ecc71' },
+                                { label: '🟢 Entradas hoy', valor: estadisticas.entradasHoy, color: '#4361ee' },
+                                { label: '🔴 Salidas hoy', valor: estadisticas.salidasHoy, color: '#e74c3c' },
+                                { label: '👥 Usuarios', valor: estadisticas.totalUsuarios, color: '#f39c12' },
+                                { label: '🚙 Vehiculos', valor: estadisticas.totalVehiculos, color: '#9b59b6' },
+                            ].map((item, i) => (
+                                <div key={i} className="card" style={{ textAlign: 'center', borderTop: `4px solid ${item.color}` }}>
+                                    <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '8px' }}>{item.label}</p>
+                                    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: item.color }}>{item.valor}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* exportar el Excel  */}
+                        <div className="top-bar">
+                            <h3>Historial de entradas y salidas</h3>
+                            <button className="btn btn-success" onClick={exportarExcel}>
+                                📥 Exportar Excel
+                            </button>
+                        </div>
+
+                        {/* grafica */}
+
+                        <div className="card">
+                            <h3 style={{ marginBottom: '20px' }}>Entradas ultimos 7 dias</h3>
+                            <ResponsiveContainer width='100%' height={250}>
+                                <BarChart data={estadisticas.porDia}>
+                                    <CartesianGrid strokeDasharray='3 3' />
+                                    <XAxis dataKey='dia' />
+                                    <YAxis allowDecimals={false} />
+                                    <Tooltip />
+                                    <Bar dataKey='total' fill='#4361ee' radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </>
+                )}
 
                 {/* Usuarios */}
                 <div className="card">
@@ -86,10 +169,37 @@ export default function Admin() {
                         </tbody>
                     </table>
                 </div>
-
-                {/* Historial */}
                 <div className="card">
                     <h3 style={{ marginBottom: '16px' }}>Historial de entradas y salidas</h3>
+
+                    {/* filtros  */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '12px', marginBottom: '20px' }}>
+                        <input
+                            placeholder="Buscar por placa"
+                            value={filtros.placa}
+                            onChange={e => setFiltros({ ...filtros, placa: e.target.value })}
+                            style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '8px' }} />
+
+                        <select
+                            value={filtros.tipo}
+                            onChange={e => setFiltros({ ...filtros, tipo: e.target.value })}
+                            style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '8px' }}>
+                            <option value="">Todos los tipos</option>
+                            <option value="entrada">Entrada</option>
+                            <option value="salida">Salida</option>
+                        </select>
+
+                        <input
+                            type="date"
+                            value={filtros.fecha_inicio}
+                            onChange={e => setFiltros({ ...filtros, fecha_inicio: e.target.value })}
+                            style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: ' 8px' }} />
+
+                        <button className="btn btn-primary" onClick={cargarHistorial} style={{ width: 'auto' }}>
+                            Filtrar
+                        </button>
+                    </div>
+
                     <table className="tabla">
                         <thead>
                             <tr>
@@ -138,6 +248,8 @@ export default function Admin() {
                         </tbody>
                     </table>
                 </div>
+
+
 
                 {/* Vehículos */}
                 <div className="card">
@@ -189,5 +301,6 @@ export default function Admin() {
                 </div>
             </div>
         </>
-    );
+
+    )
 }

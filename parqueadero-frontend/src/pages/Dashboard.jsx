@@ -62,6 +62,13 @@ export default function Dashboard() {
         }
     };
 
+    const descargarQR = (qrBase64, placa) =>{
+        const link = document.createElement('a');
+        link.href = qrBase64;
+        link.download = `QR_${placa}.png`;
+        link.click();
+    };
+
 
     return (
         <>
@@ -131,6 +138,7 @@ export default function Dashboard() {
                                     <th>Color</th>
                                     <th>Tipo</th>
                                     <th>QR</th>
+                                    <th>Descargar</th>
                                     {esAdmin && <th>Eliminar</th>}
                                 </tr>
                             </thead>
@@ -146,7 +154,15 @@ export default function Dashboard() {
                                             <button className="btn btn-primary btn-sm" onClick={() => {
                                                 setQrActual(v.qr_code);
                                                 setPlacaActual(v.placa);
-                                            }}>Ver QR</button>
+                                            }}>Ver QR
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button className="btn btn-success btn-sm"
+                                            onClick={()=> descargarQR(v.qr_code, v.placa)}>
+                                                Descargar
+                                            </button>
+
                                         </td>
                                         {esAdmin && (
                                             <td>
