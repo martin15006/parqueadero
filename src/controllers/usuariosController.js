@@ -104,6 +104,78 @@ const getTodosVehiculos = async (req, res) => {
         console.error(error);
         res.status(500).json({ mensaje: 'Error en el servidor' });
     }
-}
+};
 
-module.exports = { getUsuarios, cambiarRol, getMiPerfil, actualizarPerfil,getTodosVehiculos };
+const getPerfilUsuario = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [usuarios] = await db.query(
+            'SELECT id, nombre, apellido, cedula, telefono, email, role, created_at FROM usuarios WHERE id = ?',
+            [id]
+        );
+        if (usuarios.length === 0) {
+            return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+        }
+        res.json(usuarios[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error en el servidor' });
+    }
+};
+
+const editarPerfilUsuario = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nombre, apellido, telefono, email, passwordNueva, passwordAdmin } = req.body
+        const adminId = req.usuario.id;
+
+        // verificar contraseña al admin 
+        const [admins] = await db.query(
+            'SELECT * FROM usuarios WHERE id = ?', [adminId]
+        );
+        const adminValido = await bcrypt.compare(passwordAdmin, admins[0].password);
+        if (!adminValido) {
+            return res.status(401).json({ mensaje: 'Contraseña de administrador incorrecta' });
+        }
+        // verificar que el usuario existe 
+        const [usuarios] = await db.query(
+            'SELECT * FROM usuarios WHERE id = ?', [id]
+        );
+        if (usuarios.length === 0) {
+            return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+        }
+
+        // verificar el email unico si se llega a cambiar 
+        if (email && email !== usuarios[0].email) {
+            const [emailExiste] = await db.query(
+                'SELECT id FROM usuarios WHERE email = ? AND id != ?', [email, id]
+            );
+            if (emailExiste.length > 0) {
+                return res.status(400).json({ mensaje: 'El email ya esta en uso' });
+            }
+        }
+
+        // preparar nueva contraseña 
+        let passwordFinal = usuarios[0].password;
+        if (passwordNueva && passwordNueva.length >= 6) {
+            passwordFinal = await bcrypt.hash(passwordNueva, 10);
+        }
+        await db.query(
+            'UPDATE usuarios SET nombre = ?, apellido = ?, telefono = ?, email = ?,password = ? WHERE id = ?',
+            [
+                nombre || usuarios[0].nombre,
+                apellido || usuarios[0].apellido,
+                telefono || usuarios[0].telefono,
+                email || usuarios[0].email,
+                passwordFinal,
+                id
+            ]
+        );
+        res.json({ mensaje: 'Perfil actualizado exitosamente' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error en el servidor' });
+    }
+};
+
+module.exports = { getUsuarios, cambiarRol, getMiPerfil, actualizarPerfil, getTodosVehiculos, getPerfilUsuario,editarPerfilUsuario };

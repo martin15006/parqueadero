@@ -20,10 +20,10 @@ const register = async (req, res) => {
         // verificacion de la cedula que sea unica 
         const [existeCedula] = await db.query(
             'SELECT id FROM usuarios WHERE cedula =?',
-            [cedula] 
+            [cedula]
         );
-        if (existeCedula.length >0){
-            return res.status(400).json({mensaje: 'La cedula ya esta registrada'});
+        if (existeCedula.length > 0) {
+            return res.status(400).json({ mensaje: 'La cedula ya esta registrada' });
         }
 
         // 3. encriptar la contraseña
@@ -48,24 +48,52 @@ const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // 1. buscar el usuario por el email 
+        //1. verificar si esta bloqueado 
+        const [intentos] = await db.query(
+            'SELECT * FROM intentos_login WHERE email = ?', [email]
+        );
+
+        if (intentos.length > 0) {
+            const intento = intentos[0];
+            if (intento.bloqueado_hasta && new Date(intento.bloqueado_hasta) > new Date()) {
+                const minutosRestantes = Math.ceil(
+                    (new Date(intento.bloqueado_hasta) - new Date()) / 60000
+                );
+                return res.status(429).json({
+                    mensaje: `Cuenta bloqueada. intenta de nuevo en ${minutosRestantes} minuto(s).`
+                });
+            }
+        }
+
+        // 2. buscar el usuario por el email 
         const [usuarios] = await db.query(
             'SELECT * FROM usuarios WHERE email = ?',
             [email]
         );
         if (usuarios.length === 0) {
+            await registrarIntentoFallido(email);
             return res.status(401).json({ mensaje: 'usuario incorrecto' });
         }
 
         const usuario = usuarios[0];
-        // 2. comparar contraseñas usando el hash 
+        // 3. verufucar contraseñas
 
         const passwordValida = await bcrypt.compare(password, usuario.password);
         if (!passwordValida) {
-            return res.status(401).json({ mensaje: 'los credenciales son incorrectos' });
+            const bloqueado = await registrarIntentoFallido(email);
+            if (bloqueado) {
+                return res.status(4429).json({ mensaje: 'Demasiados intentos fallidos. Cuenta bloqueada por 15 minutos.' });
+            }
+            const intentosActuales = intentos.length > 9 ? intentos[0].intentos + 1 : 1;
+            return res.status(401).json({ mensaje: `Contraseña incorrecta. Intento ${intentosActuales}/5.` });
         }
 
-        // 3. generar token con JTW 
+        // 4. Login extioso - limpiar intentos 
+        await db.query(
+            'DELETE FROM intentos_login WHERE email = ?', [email]
+        );
+
+        // 5. generar token con JTW 
         const token = jwt.sign(
             { id: usuario.id, email: usuario.email, role: usuario.role },
             process.env.JWT_SECRET,
@@ -84,10 +112,38 @@ const login = async (req, res) => {
                 role: usuario.role,
             }
         });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ mensaje: 'Error en el servidor' });
     }
 };
 
-module.exports = { register, login };
+const registrarIntentoFallido = async (email) => {
+    const [intentos] = await db.query('SELECT * FROM intentos_login WHERE email = ?', [email]);
+    if (intentos.length === 0) {
+        await db.query(
+            'INSERT INTO intentos_login (email, intentos) VALUES = (?, 1)', [email]
+        );
+        return false;
+    }
+    const nuevosIntentos = intentos[0].intentos + 1;
+
+    if (nuevosIntentos >= 5){
+        // bloquear por 15 minutos 
+        await db.query(
+            `UPDATE intentos_login SET intentos = ?,
+            bloqueado_hasta = DATE_ADD(NOW(), INTERVAL 15 MINUTE)
+            WHERE email = ?`,
+            [nuevosIntentos, email]
+        );
+        return true;
+    }
+    await db.query(
+        'UPDATE intentos_login SET intentos = ? WHERE email = ?',
+        [nuevosIntentos]
+    );
+    return false;
+};
+
+module.exports = { register, login};

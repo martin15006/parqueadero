@@ -137,6 +137,7 @@ export default function Admin() {
                                 <th>Rol</th>
                                 <th>Fecha registro</th>
                                 <th>Cambiar Rol</th>
+                                <th>Perfil</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -163,6 +164,12 @@ export default function Admin() {
                                             <option value="celador">Celador</option>
                                             <option value="admin">Admin</option>
                                         </select>
+                                    </td>
+                                    <td><button
+                                        className="btn btn-primary btn-sm"
+                                        onClick={() => navigate(`/usuarios/${u.id}/perfil`)}>
+                                        Ver perfil
+                                    </button>
                                     </td>
                                 </tr>
                             ))}

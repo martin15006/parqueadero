@@ -40,6 +40,21 @@ const limpiarPapelera = async () => {
 setInterval(limpiarPapelera, 24 * 60 * 60 * 1000);
 limpiarPapelera(); // ejecuta al iniciar también
 
+const limpiarIntentosExpirados = async () => {
+  try {
+    const db = require('./config/db')
+    await db.query(
+      'DELETE FROM intentos_login WHERE bloqueado_hasta < NOW() OR (bloqueado_hasta IS NULL AND ultimo_intento < DATE_SUB(NOW(), INTERVAL 1 HOUR))'
+    );
+    console.log('Intentos de login limpiados');
+  }catch (error){
+    console.log('Error limpiando intentos:', error);
+  }
+};
+
+setInterval(limpiarIntentosExpirados, 60 * 60 * 1000);
+limpiarIntentosExpirados()
+
 // Iniciar servidor - siempre al final
 const PORT = process.env.PORT || 3000;
 

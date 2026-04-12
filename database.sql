@@ -35,3 +35,11 @@ CREATE TABLE IF NOT EXISTS registros (
   FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(id),
   FOREIGN KEY (celador_id) REFERENCES usuarios(id)
 );
+
+CREATE TABLE IF NOT EXISTS intentos_login (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(100) NOT NULL,
+  intentos INT DEFAULT 1,
+  ultimo_intento TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  bloqueado_hasta TIMESTAMP NULL
+);

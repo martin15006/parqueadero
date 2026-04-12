@@ -102,6 +102,7 @@ body {
 .btn-warning {
   background: #f39c12;
   color: white;
+  margin-top: 20px;
 }
 
 .btn-sm {

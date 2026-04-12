@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Dashboard from "./pages/Dashboard";
 import Celador from "./pages/Celador";
 import Perfil from "./pages/perfil";
+import PerfilUsuario from "./pages/PerfilUsuario";
 
 // protejer las rutas privadas 
 function RutaProtegida({ children, roles }) {
@@ -31,6 +32,8 @@ export default function App() {
         <Route path="/celador" element={<RutaProtegida roles={['admin', 'celador']}><Celador /></RutaProtegida>} />
 
         <Route path="/perfil" element={<RutaProtegida roles={['admin', 'celador','user']}><Perfil /></RutaProtegida>} />
+
+        <Route path="/usuarios/:id/perfil" element={<RutaProtegida roles={['admin']}><PerfilUsuario /></RutaProtegida>} />
       </Routes>
     </BrowserRouter>
   );
