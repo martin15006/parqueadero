@@ -7,9 +7,11 @@ export default function Register() {
     const [error, setError] = useState('');
     const [exito, setExito] = useState('');
     const navigate = useNavigate();
+    const [fortaleza, setFortaleza] = useState({ nivel: 0, texto: '', color: '' });
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
+        if (e.target.name === 'password') evaluarFortaleza(e.target.value);
     };
 
     const handleSubmit = async (e) => {
@@ -22,6 +24,25 @@ export default function Register() {
         } catch (err) {
             setError(err.response?.data?.mensaje || 'Error al registrarse');
         }
+    };
+
+    const evaluarFortaleza = (pass) => {
+        let nivel = 0;
+        if (pass.length >= 6) nivel++;
+        if (/[A-Z]/.test(pass)) nivel++;
+        if (/[a-z]/.test(pass)) nivel++;
+        if (/\d/.test(pass)) nivel++;
+        if (/[^A-Za-z0-9]/.test(pass)) nivel++;
+
+        const niveles = [
+            { texto: '', color: '#ddd' },
+            { texto: 'Muy débil', color: '#e74c3c' },
+            { texto: 'Débil', color: '#e67e22' },
+            { texto: 'Regular', color: '#f1c40f' },
+            { texto: 'Fuerte', color: '#2ecc71' },
+            { texte: 'Muy fuerte', color: '#27ae60' }
+        ];
+        setFortaleza({ nivel, ...niveles[nivel] });
     };
 
     return (

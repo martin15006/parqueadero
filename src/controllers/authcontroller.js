@@ -26,6 +26,12 @@ const register = async (req, res) => {
             return res.status(400).json({ mensaje: 'La cedula ya esta registrada' });
         }
 
+        // validar fortalezas de contraseña 
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
+        if (!passwordRegex.test(password)){
+            return res.status(400).json({mensaje: 'La contraseña debe tener minimo 6 caracteres, una mayúsculas, una minuscula y un numero'});
+        }
+
         // 3. encriptar la contraseña
         const passwordEncriptada = await bcrypt.hash(password, 10);
 
