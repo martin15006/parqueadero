@@ -8,6 +8,7 @@ export default function Register() {
     const [exito, setExito] = useState('');
     const navigate = useNavigate();
     const [fortaleza, setFortaleza] = useState({ nivel: 0, texto: '', color: '' });
+    const [verPassword, setVerPassword] = useState(false)
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -76,7 +77,36 @@ export default function Register() {
                     </div>
                     <div className='form-grupo'>
                         <label>Contraseña</label>
-                        <input name='password' type='password' value={form.password} onChange={handleChange} required />
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                name='password'
+                                type={verPassword ? 'text' : 'password'}
+                                value={form.password}
+                                onChange={handleChange}
+                                required
+                                style={{ paddingRight: '40px' }}
+                            />
+                            <span onClick={() => setVerPassword(!verPassword)}
+                                style={{ position: 'absolute', right: '12px', top: '18%', transform: 'traslateY(-50)', cursor: 'pointer', fontSize: '1.1rem' }}>
+                                {verPassword ? '🙈' : '🫣'}
+                            </span>
+                        </div>
+                        {form.password && (
+                            <div style={{ marginTop: '6px' }}>
+                                <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
+                                    {[1, 2, 3, 4, 5].map(n => (
+                                        <div key={n} style={{
+                                            height: '8px', flex: 1, borderRadius: '3em',
+                                            background: n <= fortaleza.nivel ? fortaleza.color : '#ddd',
+                                            transition: 'background 0.3s'
+                                        }} />
+                                    ))}
+                                </div>
+                                <span style={{ fontSize: '0.8rem', color: fortaleza.color, fontWight: '600' }}>
+                                    {fortaleza.texto}
+                                </span>
+                            </div>
+                        )}
                     </div>
                     <button type='submit' className='btn btn-primary'>Registrarse</button>
                 </form>

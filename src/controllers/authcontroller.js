@@ -88,9 +88,9 @@ const login = async (req, res) => {
         if (!passwordValida) {
             const bloqueado = await registrarIntentoFallido(email);
             if (bloqueado) {
-                return res.status(4429).json({ mensaje: 'Demasiados intentos fallidos. Cuenta bloqueada por 15 minutos.' });
+                return res.status(429).json({ mensaje: 'Demasiados intentos fallidos. Cuenta bloqueada por 15 minutos.' });
             }
-            const intentosActuales = intentos.length > 9 ? intentos[0].intentos + 1 : 1;
+            const intentosActuales = intentos.length > 0 ? intentos[0].intentos + 1 : 1;
             return res.status(401).json({ mensaje: `Contraseña incorrecta. Intento ${intentosActuales}/5.` });
         }
 
@@ -129,7 +129,7 @@ const registrarIntentoFallido = async (email) => {
     const [intentos] = await db.query('SELECT * FROM intentos_login WHERE email = ?', [email]);
     if (intentos.length === 0) {
         await db.query(
-            'INSERT INTO intentos_login (email, intentos) VALUES = (?, 1)', [email]
+            'INSERT INTO intentos_login (email, intentos) VALUES (?, 1)', [email]
         );
         return false;
     }
@@ -147,7 +147,7 @@ const registrarIntentoFallido = async (email) => {
     }
     await db.query(
         'UPDATE intentos_login SET intentos = ? WHERE email = ?',
-        [nuevosIntentos]
+        [nuevosIntentos, email]
     );
     return false;
 };

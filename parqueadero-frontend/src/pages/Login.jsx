@@ -4,17 +4,24 @@ import "../index.css"
 import api from '../api/axios';
 
 
+
 export default function Login() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [form, setForm] = useState({ email: '', password: '' });
+    // const [email, setEmail] = useState('');
+    // const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const [verPassword, setVerPassword] = useState(false)
+
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         try {
-            const res = await api.post('/auth/login', { email, password });
+            const res = await api.post('/auth/login', form);
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('usuario', JSON.stringify(res.data.usuario));
 
@@ -39,11 +46,27 @@ export default function Login() {
                 <form onSubmit={handleSubmit}>
                     <div className="form-grupo">
                         <label>Correo elecctronico</label>
-                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                        <input
+                            name='email'
+                            type="email"
+                            value={form.email}
+                            onChange={handleChange}
+                        />
                     </div>
                     <div className="form-grupo">
                         <label>Contraseña</label>
-                        <input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+                        <div style={{ position: 'relative' }}>
+                            <input name='password'
+                                type={verPassword ? 'text' : 'password'}
+                                value={form.password}
+                                onChange={handleChange}
+                                required
+                            />
+                            <span onClick={() => setVerPassword(!verPassword)}
+                                style={{ position: 'absolute', right: '12px', top: '45%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: '1.1rem' }}>
+                                {verPassword ? '🫣' : '🙈'}
+                            </span>
+                        </div>
                     </div>
                     <button type="submit" className="btn btn-primary">Entrar</button>
                 </form>
