@@ -39,7 +39,12 @@ export default function Admin() {
             setError('Error al cargar los datos');
         }
     };
-    const totalCeladores = usuarios.filter(u => u.role === 'celador').length
+    const totalCeladores = usuarios?.filter(u => u.role === 'celador').length || 0;
+
+    const datosGrafica = estadisticas?.porDia?.map(item => ({
+        dia: new Date(item.dia).toLocaleDateString(),
+        total: item.total
+    })) || [];
 
     const cargarHistorial = async () => {
         try {
@@ -116,12 +121,12 @@ export default function Admin() {
                         <div className="card">
                             <h3 style={{ marginBottom: '20px' }}>Entradas ultimos 7 dias</h3>
                             <ResponsiveContainer width='100%' height={250}>
-                                <BarChart data={estadisticas.porDia}>
+                                <BarChart data={datosGrafica}>
                                     <CartesianGrid strokeDasharray='3 3' />
-                                    <XAxis dataKey='dia' />
+                                    <XAxis dataKey='dia' tick={{ fontSize: 12 }} />
                                     <YAxis allowDecimals={false} />
                                     <Tooltip />
-                                    <Bar dataKey='total' fill='#4361ee' radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey='total' fill='#4361ee' radius={[20, 20,0,0]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
