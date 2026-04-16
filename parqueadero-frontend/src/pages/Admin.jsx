@@ -41,10 +41,11 @@ export default function Admin() {
     };
     const totalCeladores = usuarios?.filter(u => u.role === 'celador').length || 0;
 
-    const datosGrafica = estadisticas?.porDia?.map(item => ({
+    const datosGrafica = (estadisticas?.porDia ?? []).map(item => ({
         dia: new Date(item.dia).toLocaleDateString(),
-        total: item.total
-    })) || [];
+        entrada: Number(item.entrada || 0),
+        salida: Number(item.salida || 0)
+    }));
 
     const cargarHistorial = async () => {
         try {
@@ -120,15 +121,19 @@ export default function Admin() {
 
                         <div className="card">
                             <h3 style={{ marginBottom: '20px' }}>Entradas ultimos 7 dias</h3>
-                            <ResponsiveContainer width='100%' height={250}>
-                                <BarChart data={datosGrafica}>
-                                    <CartesianGrid strokeDasharray='3 3' />
-                                    <XAxis dataKey='dia' tick={{ fontSize: 12 }} />
-                                    <YAxis allowDecimals={false} />
-                                    <Tooltip />
-                                    <Bar dataKey='total' fill='#4361ee' radius={[20, 20,0,0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
+
+                            {datosGrafica.length > 0 && (
+                                <ResponsiveContainer width='100%' height={250}>
+                                    <BarChart data={datosGrafica}>
+                                        <CartesianGrid strokeDasharray='3 3' />
+                                        <XAxis dataKey='dia' tick={{ fontSize: 12 }} />
+                                        <YAxis allowDecimals={false} />
+                                        <Tooltip />
+                                        <Bar dataKey='entrada' fill='#2ecc71' radius={[20, 20, 0, 0]} />
+                                        <Bar dataKey='salida' fill='#e74c3c' radius={[20, 20, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            )}
                         </div>
                     </>
                 )}

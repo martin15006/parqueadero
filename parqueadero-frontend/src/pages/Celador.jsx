@@ -80,6 +80,7 @@ export default function Celador() {
         setError('');
         setExito('');
         try {
+            await buscarPorPlaca(vehiculo.placa);
             await api.post('/registros', { placa: vehiculo.placa, tipo });
             setExito(`${tipo === 'entrada' ? 'Entrada' : 'Salida'} registrada exitosamente`);
             setVehiculo(null);

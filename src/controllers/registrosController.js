@@ -182,9 +182,12 @@ const getEstadisticas = async (req, res) => {
         );
 
         const [porDia] = await db.query(
-            `SELECT DATE(fecha)as dia, COUNT(*) as total
+            `SELECT 
+            DATE(fecha) as dia,
+            SUM(CASE WHEN tipo = 'entrada' THEN 1 ELSE 0 END) AS entrada,
+            SUM(CASE WHEN tipo = 'salida' THEN 1 ELSE 0 END) AS salida
             FROM registros 
-            WHERE tipo = 'entrada' AND fecha >=DATE_SUB(CURDATE(), INTERVAL 7 DAY) 
+            WHERE fecha >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) 
             GROUP BY DATE(fecha)
             ORDER BY dia ASC`
         );
