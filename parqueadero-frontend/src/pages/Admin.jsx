@@ -39,6 +39,7 @@ export default function Admin() {
             setError('Error al cargar los datos');
         }
     };
+    const totalCeladores = usuarios.filter(u => u.role === 'celador').length
 
     const cargarHistorial = async () => {
         try {
@@ -92,6 +93,7 @@ export default function Admin() {
                                 { label: '🟢 Entradas hoy', valor: estadisticas.entradasHoy, color: '#4361ee' },
                                 { label: '🔴 Salidas hoy', valor: estadisticas.salidasHoy, color: '#e74c3c' },
                                 { label: '👥 Usuarios', valor: estadisticas.totalUsuarios, color: '#f39c12' },
+                                { label: '💂 Celadores', valor: totalCeladores, color: '#3498db' },
                                 { label: '🚙 Vehiculos', valor: estadisticas.totalVehiculos, color: '#9b59b6' },
                             ].map((item, i) => (
                                 <div key={i} className="card" style={{ textAlign: 'center', borderTop: `4px solid ${item.color}` }}>
