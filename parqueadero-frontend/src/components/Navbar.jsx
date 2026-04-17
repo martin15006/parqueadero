@@ -20,6 +20,7 @@ export default function Navbar() {
                 <Link to="/dashboard">Inicio</Link>
                 <Link to="/perfil">Perfil</Link>
                 <Link to={""}>Mapa</Link>
+                <Link to="/mi-historial">Mi historial</Link>
                 
             </div>
             <div style={{ display: 'flex', alignItems: 'center' }}>

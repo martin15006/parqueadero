@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Celador from "./pages/Celador";
 import Perfil from "./pages/perfil";
 import PerfilUsuario from "./pages/PerfilUsuario";
+import MiHistorial from "./pages/MiHistorial";
 
 // protejer las rutas privadas 
 function RutaProtegida({ children, roles }) {
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/perfil" element={<RutaProtegida roles={['admin', 'celador','user']}><Perfil /></RutaProtegida>} />
 
         <Route path="/usuarios/:id/perfil" element={<RutaProtegida roles={['admin']}><PerfilUsuario /></RutaProtegida>} />
+        <Route path="/mi-historial" element={<RutaProtegida roles= {['admin', 'celador','user']}><MiHistorial /></RutaProtegida>} />
       </Routes>
     </BrowserRouter>
   );

@@ -10,9 +10,9 @@ const registrarMovimiento = async (req, res) => {
         // 1. Buscar el vehículo por placa
         const [vehiculos] = await db.query(
             `SELECT v.*, u.nombre, u.email 
-       FROM vehiculos v 
-       JOIN usuarios u ON v.usuario_id = u.id 
-       WHERE v.placa = ?`,
+            FROM vehiculos v 
+            JOIN usuarios u ON v.usuario_id = u.id 
+            WHERE v.placa = ?`,
             [placa]
         );
 
@@ -97,7 +97,7 @@ const verHistorial = async (req, res) => {
 
         if (fecha_fin) {
             condiciones.push('r.fecha <= ?');
-            valores.push(fecha_fin + '23:59:59');
+            valores.push(fecha_fin + ' 23:59:59');
         }
 
         const where = condiciones.length > 0 ? 'WHERE ' + condiciones.join(' AND ') : '';
@@ -207,4 +207,52 @@ const getEstadisticas = async (req, res) => {
     }
 };
 
-module.exports = { registrarMovimiento, verHistorial, eliminarRegistro, getEstadisticas };
+const getHistorialUsuario = async (req, res) => {
+    try {
+        const usuario_id = req.usuario.id;
+        const { fecha_inicio, fecha_fin } = req.query;
+
+        let condiciones = ['(v.usuario_id = ? OR r.placa_referencia IN (SELECT placa FROM vehiculos where usuario_id = ?))'];
+        let valores = [usuario_id, usuario_id];
+
+        if (fecha_inicio && fecha_fin) {
+            condiciones.push('r.fecha BETWEEN ? AND ?');
+            valores.push(
+                fecha_inicio + ' 00:00:00',
+                fecha_fin + ' 23:59:59');
+        } else {
+            if (fecha_inicio) {
+                condiciones.push('r.fecha BETWEEN? AND ?');
+                valores.push(
+                    fecha_inicio + ' 00:00:00',
+                    fecha_inicio + ' 23:59:59');
+            };
+            if (fecha_fin) {
+                condiciones.push('r.fecha BETWEEN ? AND ?');
+                valores.push(
+                    fecha_fin + ' 00:00:00',
+                    fecha_fin + ' 23:59:59');
+            };
+        }
+
+        const [registros] = await db.query(
+            `SELECT r.id, r.tipo AS tipo_registro, r.fecha,
+            COALESCE(v.placa, r.placa_referencia, '-') as placa,
+            COALESCE(v.marca, r.marca_referencia, '-') as marca,
+            COALESCE(v.modelo, r.modelo_referencia, '-') as modelo,
+            c.nombre AS celador
+            FROM registros r
+            LEFT JOIN vehiculos v ON r.vehiculo_id = v.id
+            LEFT JOIN usuarios c ON r.celador_id = c.id
+            WHERE ${condiciones.join(' AND ')}
+            ORDER BY r.fecha DESC`,
+            valores
+        );
+        res.json(registros);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error en el servidor' });
+    }
+};
+
+module.exports = { registrarMovimiento, verHistorial, eliminarRegistro, getEstadisticas, getHistorialUsuario };
