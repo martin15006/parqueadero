@@ -12,6 +12,9 @@ export default function Dashboard() {
     const navigate = useNavigate();
     const [PlacaActual, setPlacaActual] = useState('');
     const esAdmin = JSON.parse(localStorage.getItem('usuario') || '{}').role === 'admin';
+    const [vehiculoEditando, setVehiculoEditando] = useState(null);
+    const [formEditar, setFormEditar] = useState({ marca: '', modelo: '', color: '', tipo: 'carro' });
+
 
     useEffect(() => {
         if (!localStorage.getItem('token')) {
@@ -62,11 +65,25 @@ export default function Dashboard() {
         }
     };
 
-    const descargarQR = (qrBase64, placa) =>{
+    const descargarQR = (qrBase64, placa) => {
         const link = document.createElement('a');
         link.href = qrBase64;
         link.download = `QR_${placa}.png`;
         link.click();
+    };
+
+    const handleEditar = async (e) => {
+        e.preventDefault();
+        setError('');
+        setExito('');
+        try {
+            await api.put(`/vehiculos/${vehiculoEditando.id}`, formEditar);
+            setExito('Vehiculo actualizado exitosamente');
+            setVehiculoEditando(null)
+            cargarVehiculos();
+        } catch (err) {
+            setError(err.response?.data?.mensaje || 'Error al actualizar');
+        }
     };
 
 
@@ -139,6 +156,7 @@ export default function Dashboard() {
                                     <th>Tipo</th>
                                     <th>QR</th>
                                     <th>Descargar</th>
+                                    <th>Editar</th>
                                     {esAdmin && <th>Eliminar</th>}
                                 </tr>
                             </thead>
@@ -159,21 +177,62 @@ export default function Dashboard() {
                                         </td>
                                         <td>
                                             <button className="btn btn-success btn-sm"
-                                            onClick={()=> descargarQR(v.qr_code, v.placa)}>
+                                                onClick={() => descargarQR(v.qr_code, v.placa)}>
                                                 Descargar
                                             </button>
 
+                                        </td>
+                                        <td>
+                                            <button className="btn btn-warning btn-sm" style={{marginTop: '0'}}  onClick={() => {
+                                                setVehiculoEditando(v);
+                                                setFormEditar({ marca: v.marca || '', modelo: v.modelo || '', color: v.color || '', tipo: v.tipo || 'carro' });
+                                            }}>Editar</button>
                                         </td>
                                         {esAdmin && (
                                             <td>
                                                 <button className="btn btn-danger btn-sm" onClick={() => { eliminarVehiculo(v.id) }}>Eliminar</button>
                                             </td>)}
+
+
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     )}
                 </div>
+                {vehiculoEditando && (
+                    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', }}>
+                        <div style={{ background: 'white', padding: '32px', borderRadius: '12px', width: '440px', maxWidth: '95vw' }}>
+                            <h3 style={{ marginBottom: '20px' }}>Editar Vehículo - {vehiculoEditando.placa}</h3>
+                            {error && <div className="alerta alerta-error">{error}</div>}
+                            <form onSubmit={handleEditar}>
+                                <div className="form-grupo">
+                                    <label>Marca</label>
+                                    <input value={formEditar.marca} onChange={e => setFormEditar({ ...formEditar, marca: e.target.value })} />
+                                </div>
+                                <div className="form-grupo">
+                                    <label>Modelo</label>
+                                    <input value={formEditar.modelo} onChange={e => setFormEditar({ ...formEditar, modelo: E.target.value })} />
+                                </div>
+                                <div className="form-grupo">
+                                    <label>Color</label>
+                                    <input value={formEditar.color} onChange={e => setFormEditar({ ...formEditar, color: e.target.value })} />
+                                </div>
+                                <div className="form-grupo">
+                                    <label>Tipo</label>
+                                    <select value={formEditar.tipo} onChange={e => setFormEditar({ ...formEditar, tipo: e.target.value })}>
+                                        <option value="carro">Carro</option>
+                                        <option value="moto">Moto</option>
+                                    </select>
+                                </div>
+                                <div style={{ display: "flex", gap: '10px', marginTop: '20px' }}>
+                                    <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Guardar</button>
+                                    <button type="button" className="btn btn-danger" style={{ flex: 1 }} onClick={() => setVehiculoEditando(null)}>Cancelar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )};
             </div>
         </>
     );

@@ -132,5 +132,34 @@ const eliminarVehiculo = async (req, res) => {
     }
 };
 
+const editarVehiculo = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { marca, modelo, color, tipo } = req.body;
+        const usuario_id = req.usuario.id;
 
-module.exports = { crearVehiculo, misVehiculos, buscarPorPlaca, eliminarVehiculo };
+        // verificar que el vehiculo existe 
+        const [vehiculos] = await db.query(
+            'SELECT * FROM vehiculos WHERE id = ? AND usuario_id = ?', [id, usuario_id]
+        );
+        if (vehiculos.length === 0) {
+            return res.status(404).json({ mensaje: 'Vehiculo no encontrado o no tienes permiso' });
+        }
+
+        await db.query(
+            'UPDATE vehiculos SET marca = ?, modelo = ?, color = ?, tipo = ? WHERE id = ?',
+            [marca, modelo, color, tipo, id]
+        );
+
+        const [actualizado] = await db.query(
+            'SELECT id, placa, marca, modelo, color, tipo, qr_code FROM vehiculos WHERE id = ?', [id]
+        )
+
+        res.json({ mensaje: 'Vehiculo actualizado exitosamente', vehiculo: actualizado[0] });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error en el servidor' });
+    }
+};
+
+module.exports = { crearVehiculo, misVehiculos, buscarPorPlaca, eliminarVehiculo, editarVehiculo };
