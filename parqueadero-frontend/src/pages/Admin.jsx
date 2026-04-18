@@ -5,6 +5,9 @@ import api from "../api/axios";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import ExcelJS from 'exceljs';
 
 export default function Admin() {
     const [usuarios, setUsuarios] = useState([]);
@@ -62,22 +65,119 @@ export default function Admin() {
         }
     };
 
-    const exportarExcel = () => {
-        const datos = historial.map(r => ({
-            'Tipo': r.tipo_registro,
-            'Placa': r.placa,
-            'Marca': r.marca,
-            'Propietario': r.propietario,
-            'Celador': r.celador || '-',
-            'Fecha': new Date(r.fecha).toLocaleString()
-        }));
+    const exportarExcel = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Historial');
 
-        const hoja = XLSX.utils.json_to_sheet(datos);
-        const libro = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(libro, hoja, 'Historial');
-        const buffer = XLSX.write(libro, { bookType: 'xlsx', type: 'array' });
-        const blob = new Blob([buffer], { type: 'application/octet-stream' });
-        saveAs(blob, `historial_parqueadero_${new Date().toLocaleDateString()}.xlsx`);
+        worksheet.columns = [
+            { header: 'Tipo', key: 'tipo', width: 15 },
+            { header: 'Placa', key: 'placa', width: 15 },
+            { header: 'Marca', key: 'marca', width: 15 },
+            { header: 'Modelo', key: 'modelo', width: 15 },
+            { header: 'Propietario', key: 'propietario', width: 15 },
+            { header: 'celador', key: 'celador', width: 15 },
+            { header: 'Fecha', key: 'fecha', width: 17 }
+        ];
+
+        historial.forEach(r => {
+            worksheet.addRow({
+                tipo: r.tipo_registro,
+                placa: r.placa,
+                marca: r.marca,
+                modelo: r.modelo,
+                propietario: r.propietario,
+                celador: r.celador || '-',
+                fecha: new Date(r.fecha)
+            });
+        });
+
+        // estilos de encabezado 
+        worksheet.getRow(1).eachCell(cell => {
+            cell.font = { bold: true };
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFbfbfbf' }
+            };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+        });
+
+        // bordes para todas las celdas 
+        worksheet.eachRow((row, rowNumber) => {
+            row.eachCell(cell => {
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+
+                // filas alternadas 
+                if (rowNumber > 1 && rowNumber % 2 === 0) {
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFF2F2F2' }
+                    };
+                }
+            });
+        });
+
+        // Alineacion de columnas 
+        ['tipo', 'placa', 'marca', 'modelo'].forEach(col => {
+            worksheet.getColumn(col).alignment = { horizontal: 'center' };
+        });
+
+        // Formato de fecha
+        worksheet.getColumn('fecha').numFmt = 'dd/mm/yyyy hh:mm';
+
+        // filtro tipo excel 
+        worksheet.autoFilter = {
+            from: 'A1',
+            to: 'G1'
+        };
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), `historial_parqueadero.xlsx`);
+    };
+
+    const exportarPDF = () => {
+        const doc = new jsPDF();
+
+        // Titulo 
+        doc.setFontSize(18);
+        doc.setTextColor(31, 78, 128);
+        doc.text('Sistema de Parqueader', 14, 20);
+
+        doc.setFontSize(12);
+        doc.setTextColor(100);
+        doc.text('Historial de entradas y salidas', 14, 30);
+        doc.text(`Generado: ${new Date().toLocaleString()}`, 14, 37);
+
+        // Tabla 
+        autoTable(doc, {
+            startY: 45,
+            head: [['Tipo', 'Placa', 'Marca', 'Modelo', 'Propietario', 'Celador', 'Fecha']],
+            body: historial.map(r => [
+                r.tipo_registro === 'entrada' ? 'Entrada' : 'Salida',
+                r.placa || '-',
+                r.marca || '-',
+                r.modelo || '-',
+                r.propietario || '-',
+                r.celador || '-',
+                new Date(r.fecha).toLocaleString()
+            ]),
+            headStyles: { fillColor: [31, 78, 138], textColor: 255 },
+            alternateRowStyles: { fillColor: [245, 245, 245] },
+            styles: { fontSize: 9, font: 'helvetica' },
+        });
+
+        doc.save(`historial_parqueadero_${new Date().toLocaleDateString()}.pdf`);
     };
 
     return (
@@ -110,12 +210,18 @@ export default function Admin() {
                         </div>
 
                         {/* exportar el Excel  */}
-                        <div className="top-bar">
-                            <h3>Historial de entradas y salidas</h3>
+                        <h3>Historial de entradas y salidas</h3>
+
+                        <div className="top-bar" style={{ display: 'flex', gap: '20px', justifyContent: 'end' }}>
                             <button className="btn btn-success" onClick={exportarExcel}>
                                 📥 Exportar Excel
                             </button>
+                            {/* exportar el pdf  */}
+                            <button className="btn btn-danger" onClick={exportarPDF}>
+                                📄 Exportar PDF
+                            </button>
                         </div>
+
 
                         {/* grafica */}
 
