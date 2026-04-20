@@ -39,6 +39,10 @@ CREATE TABLE IF NOT EXISTS registros (
   marca_referencia VARCHAR(50) NULL,
   modelo_referencia VARCHAR(50) NULL,
   fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  INDEX (vehiculo_id),
+  INDEX (celador_id),
+  
   FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(id) ON DELETE SET NULL,
   FOREIGN KEY (celador_id) REFERENCES usuarios(id) ON DELETE SET NULL
 );
