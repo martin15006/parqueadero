@@ -212,7 +212,7 @@ export default function Dashboard() {
                                 </div>
                                 <div className="form-grupo">
                                     <label>Modelo</label>
-                                    <input value={formEditar.modelo} onChange={e => setFormEditar({ ...formEditar, modelo: E.target.value })} />
+                                    <input value={formEditar.modelo} onChange={e => setFormEditar({ ...formEditar, modelo: e.target.value })} />
                                 </div>
                                 <div className="form-grupo">
                                     <label>Color</label>

@@ -70,7 +70,10 @@ const buscarPorPlaca = async (req, res) => {
     try {
         const { placa } = req.params;
         const [resultado] = await db.query(
-            'SELECT v.*, u.nombre, u.email, u.apellido, u.cedula, u.telefono FROM vehiculos v JOIN usuarios u ON v.usuario_id = u.id WHERE v.placa =?',
+            `SELECT v.*, u.nombre, u.apellido, u.cedula, u.telefono, u.email
+            FROM vehiculos v 
+            JOIN usuarios u ON v.usuario_id = u.id 
+            WHERE v.placa =?`,
             [placa]
         );
         if (resultado.length === 0) {

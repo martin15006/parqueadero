@@ -21,6 +21,7 @@ export default function Navbar() {
                 <Link to="/perfil">Perfil</Link>
                 <Link to={""}>Mapa</Link>
                 <Link to="/mi-historial">Mi historial</Link>
+                {usuario.role === 'admin' && <Link to='/visitantes'>Visitantes</Link>}
                 
             </div>
             <div style={{ display: 'flex', alignItems: 'center' }}>

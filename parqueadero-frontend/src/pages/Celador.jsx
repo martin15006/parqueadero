@@ -17,7 +17,6 @@ export default function Celador() {
         const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
         if (!['admin', 'celador'].includes(usuario.role)) {
             navigate('/login');
-            navigate('/perfil');
         }
 
         return () => {
@@ -28,21 +27,36 @@ export default function Celador() {
     }, []);
 
     const iniciarEscaner = async () => {
+        setError('');
+        setEscaneando(true);
         const html5Qrcode = new Html5Qrcode('lector-qr');
         html5QrRef.current = html5Qrcode;
         try {
             await html5Qrcode.start(
                 { facingMode: 'environment' }, //camara
                 { fps: 10, qrbox: { width: 250, height: 250 } },
-                async (textoQR) => {
 
+                async (textoQR) => {
                     await html5Qrcode.stop();
                     setEscaneando(false);
 
                     try {
                         const datos = JSON.parse(textoQR);
-                        setPlaca(datos.placa);
-                        buscarPorPlaca(datos.placa);
+
+                        if (datos.tipo === 'visitante') {
+                            // Es un QR de visitante 
+                            try {
+                                const res = await api.post('/visitantes/entrada-qr', { qr_data: textoQR });
+                                setVehiculo({ ...res.data.visitantes, esVisitante: true });
+                                setExito('Visitante identificado- Confirma la entrada');
+                            } catch (err) {
+                                setError(err.response?.data?.mensaje || 'Error al procesar QR de visitante');
+                            }
+                        } else {
+                            // Es un QR de un usuario normal 
+                            setPlaca(datos.placa);
+                            buscarPorPlaca(datos.placa);
+                        }
                     } catch {
                         setError('QR invalido');
                     }
@@ -64,15 +78,21 @@ export default function Celador() {
     };
 
     const buscarPorPlaca = async (placaBuscar) => {
-        const placaFinal = placaBuscar || placa;
+        const placaFinal = (placaBuscar || placa).trim().toUpperCase();
         setError('');
         setExito('');
         setVehiculo(null);
         try {
+            // primero busca en usuarios registrados
             const res = await api.get(`/vehiculos/buscar/${placaFinal}`);
-            setVehiculo(res.data);
+            setVehiculo({ ...res.data, esVisitante: false });
         } catch {
-            setError('vehiculo no encontrado');
+            try {
+                const resV = await api.get(`/visitantes/buscar/${placaFinal}`);
+                setVehiculo({ ...resV.data, esVisitante: true });
+            } catch {
+                setError('vehiculo no encontrado');
+            }
         }
     };
 
@@ -80,7 +100,6 @@ export default function Celador() {
         setError('');
         setExito('');
         try {
-            await buscarPorPlaca(vehiculo.placa);
             await api.post('/registros', { placa: vehiculo.placa, tipo });
             setExito(`${tipo === 'entrada' ? 'Entrada' : 'Salida'} registrada exitosamente`);
             setVehiculo(null);
@@ -115,7 +134,10 @@ export default function Celador() {
                 {/* buscar por placa  */}
                 <div className="card">
                     <h3 style={{ marginBottom: '16px' }}>Buscar por la placa</h3>
-                    <form onSubmit={(e) => { e.preventDefault(); buscarPorPlaca(); }}
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        buscarPorPlaca();
+                    }}
                         style={{ display: 'flex', gap: '12px' }}>
                         <input
                             style={{ flex: 1, padding: '10px 14px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem' }}
@@ -132,51 +154,120 @@ export default function Celador() {
                 {/* datos del vehiculo  */}
                 {vehiculo && (
                     <div className="card">
-                        <h3 style={{ marginBottom: '20px' }}>Informacion</h3>
+                        {/* tipo  */}
+                        <div style={{ marginBottom: '16px' }}>
+                            {vehiculo.esVisitante ? (
+                                <span style={{ background: '#f39c12', color: 'white', padding: '6px 16px', borderRadius: '20px', fontWeight: 'bold' }}>
+                                    Visitante Temporal
+                                </span>
+                            ) : (
+                                <span style={{ background: '#2ecc71', color: 'white', padding: '6px 16px', borderRadius: '20px', fontWeight: 'bold' }}>
+                                    Usuario Registrado
+                                </span>
+                            )}
+                        </div>
+
+                        <h3 style={{ marginBottom: '20px' }}>Informacion del {vehiculo.esVisitante ? 'Visitante' : 'Propietario'}</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                            {/* datos del propietario  */}
-                            <div style={{ borderRadius: '8px', overflow: 'hidden' }}>
-                                <h4 style={{ marginBottom: '12px', color: '#4a973b' }}>Propietaro</h4>
+
+                            <div>
+                                <h4 style={{ marginBottom: '12px', color: '#4361ee' }}>
+                                    {vehiculo.esVisitante ? 'Visitante' : 'Propietario'}
+                                </h4>
                                 <table className="tabla">
                                     <tbody>
                                         <tr><td><strong>Nombre</strong></td><td>{vehiculo.nombre}</td></tr>
-                                        <tr><td><strong>Apellido</strong></td><td>{vehiculo.apellido}</td></tr>
-                                        <tr><td><strong>Cedula</strong></td><td>{vehiculo.cedula}</td></tr>
-                                        <tr><td><strong>Telefono</strong></td><td>{vehiculo.telefono}</td></tr>
-                                        <tr><td><strong>Email</strong></td><td>{vehiculo.email}</td></tr>
+                                        <tr><td><strong>Apellido</strong></td><td>{vehiculo.apellido || '-'}</td></tr>
+                                        <tr><td><strong>Cedula</strong></td><td>{vehiculo.esVisitante ? (vehiculo.documento || '-') : (vehiculo.cedula || '-')}</td></tr>
+                                        <tr><td><strong>Telefono</strong></td><td>{vehiculo.telefono || '-'}</td></tr>
+
+                                        <tr><td><strong>correo</strong></td><td>{vehiculo.esVisitante ? (vehiculo.correo || '-') : (vehiculo.email || '-')}</td></tr>
+                                        {vehiculo.esVisitante && (
+                                            <tr><td><strong>Descripcion</strong></td><td>{vehiculo.descripcion || '-'}</td></tr>
+                                        )}
+
                                     </tbody>
                                 </table>
                             </div>
                             {/* datos del vehiculo  */}
-                            <div style={{ borderRadius: '8px', overflow: 'hidden' }}>
+                            <div>
                                 <h4 style={{ marginBottom: '12px', color: '#4a973b' }}>Vehiculo</h4>
                                 <table className="tabla">
                                     <tbody>
-                                        <tr><td><strong>Placa</strong></td><td>{vehiculo.placa}</td></tr>
-                                        <tr><td><strong>Tipo</strong></td><td>{vehiculo.tipo}</td></tr>
-                                        <tr><td><strong>Marca</strong></td><td>{vehiculo.marca}</td></tr>
-                                        <tr><td><strong>Modelo</strong></td><td>{vehiculo.modelo}</td></tr>
-                                        <tr><td><strong>Color</strong></td><td>{vehiculo.color}</td></tr>
-
+                                        <tr><td><strong>Placa</strong></td><td>{vehiculo.placa || '-'}</td></tr>
+                                        <tr><td><strong>Tipo</strong></td><td>{vehiculo.tipo_vehiculo || vehiculo.tipo || '-'}</td></tr>
+                                        <tr><td><strong>Marca</strong></td><td>{vehiculo.marca || '-'}</td></tr>
+                                        <tr><td><strong>Modelo</strong></td><td>{vehiculo.modelo || '-'}</td></tr>
+                                        <tr><td><strong>Color</strong></td><td>{vehiculo.color || vehiculo.descripcion || '-'}</td></tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
 
                         <div style={{ display: 'flex', gap: '12px' }}>
-                            <button
-                                className="btn btn-success"
-                                style={{ flex: 1, padding: '14px' }}
-                                onClick={() => registrarMovimiento('entrada')}>
-                                Registrar Entrada
-                            </button>
+                            {vehiculo.esVisitante ? (
+                                vehiculo.estado === 'pendiente' ? (
+                                    // Visitantes pendiente- solo puede entrar 
+                                    <button className="btn btn-success" style={{ flex: 1, padding: '14px' }}
+                                        onClick={async () => {
+                                            try {
+                                                await api.put(`/visitantes/${vehiculo.id}/entrada`);
+                                                setExito('Entrada de visitante registrada');
+                                                setVehiculo(null);
+                                                setPlaca('');
+                                            } catch (err) {
+                                                setError(err.response?.data?.mensaje || 'Error al registrar entrada');
+                                            }
+                                        }}>
+                                        Registrar Entrada Visitante
+                                    </button>
+                                ) : vehiculo.estado === 'adentro' ? (
 
-                            <button
-                                className="btn btn-danger"
-                                style={{ flex: 1, padding: '14px' }}
-                                onClick={() => registrarMovimiento('salida')}>
-                                Registrar Salida
-                            </button>
+                                    // para visitantes que ya entraron solo muestra la salida 
+
+                                    <button className="btn btn-danger" style={{ flex: 1, padding: '14px' }}
+                                        onClick={async () => {
+                                            try {
+                                                await api.put(`/visitantes/${vehiculo.id}/salida`);
+                                                setExito('Salida del visitante registrada - QR invalidado');
+                                                setVehiculo(null);
+                                                setPlaca('');
+                                            } catch (err) {
+                                                setError(err.response?.data.mensaje || 'Error');
+                                            }
+                                        }}>
+                                        Registrar Salida del visitante
+                                    </button>
+                                ) : (
+                                    <button className="btn btn-success" style={{ flex: 1, padding: '14px' }}
+                                        onClick={async () => {
+                                            try {
+                                                await api.post('/visitantes/entrada-qr', {
+                                                    qr_data: JSON.stringify({ tipo: 'visitante', nombre: vehiculo.nombre })
+                                                });
+                                                setExito('Entrada del visitante registrada');
+                                                setVehiculo(null);
+                                                setPlaca('');
+                                            } catch (err) {
+                                                setError(err.response?.data?.mensaje || 'Error');
+                                            }
+                                        }}>
+                                        Confirmar Entrada del Visitante
+                                    </button>
+                                )
+                            ) : (
+                                // para usuarios registrados, mostrar entrada y salida 
+                                <>
+                                    <button className="btn btn-success" style={{ flex: 1, padding: '14px' }}
+                                        onClick={() => registrarMovimiento('entrada')}>
+                                        Registrar Entrada
+                                    </button>
+                                    <button className="btn btn-danger" style={{ flex: 1, padding: '14px' }}
+                                        onClick={() => registrarMovimiento('salida')}>
+                                        Registrar Salida
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                 )}
