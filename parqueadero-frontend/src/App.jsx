@@ -27,6 +27,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/landing" element={<Landing />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/admin" element={<RutaProtegida roles={['admin']}><Admin /></RutaProtegida>} />
 
         <Route path="/register" element={<Register />} />
