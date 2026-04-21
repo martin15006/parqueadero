@@ -161,7 +161,7 @@ export default function Celador() {
                                     Visitante Temporal
                                 </span>
                             ) : (
-                                <span style={{ background: '#2ecc71', color: 'white', padding: '6px 16px', borderRadius: '20px', fontWeight: 'bold' }}>
+                                <span style={{ background: '#2b00ff', color: 'white', padding: '6px 16px', borderRadius: '20px', fontWeight: 'bold' }}>
                                     Usuario Registrado
                                 </span>
                             )}
@@ -191,7 +191,7 @@ export default function Celador() {
                             </div>
                             {/* datos del vehiculo  */}
                             <div>
-                                <h4 style={{ marginBottom: '12px', color: '#4a973b' }}>Vehiculo</h4>
+                                <h4 style={{ marginBottom: '12px', color: '#4488e1' }}>Vehiculo</h4>
                                 <table className="tabla">
                                     <tbody>
                                         <tr><td><strong>Placa</strong></td><td>{vehiculo.placa || '-'}</td></tr>

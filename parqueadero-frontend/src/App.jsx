@@ -8,6 +8,7 @@ import Perfil from "./pages/perfil";
 import PerfilUsuario from "./pages/PerfilUsuario";
 import MiHistorial from "./pages/MiHistorial";
 import Visitantes from "./pages/Visitantes";
+import Landing from "./pages/Landing";
 
 // protejer las rutas privadas 
 function RutaProtegida({ children, roles }) {
@@ -25,18 +26,17 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Navigate to="/login" />} />
-
+        <Route path="/landing" element={<Landing />} />
         <Route path="/admin" element={<RutaProtegida roles={['admin']}><Admin /></RutaProtegida>} />
 
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/celador" element={<RutaProtegida roles={['admin', 'celador']}><Celador /></RutaProtegida>} />
 
-        <Route path="/perfil" element={<RutaProtegida roles={['admin', 'celador','user']}><Perfil /></RutaProtegida>} />
+        <Route path="/perfil" element={<RutaProtegida roles={['admin', 'celador', 'user']}><Perfil /></RutaProtegida>} />
 
         <Route path="/usuarios/:id/perfil" element={<RutaProtegida roles={['admin']}><PerfilUsuario /></RutaProtegida>} />
-        <Route path="/mi-historial" element={<RutaProtegida roles= {['admin', 'celador','user']}><MiHistorial /></RutaProtegida>} />
+        <Route path="/mi-historial" element={<RutaProtegida roles={['admin', 'celador', 'user']}><MiHistorial /></RutaProtegida>} />
 
         <Route path="/visitantes" element={<RutaProtegida roles={['admin']}><Visitantes /></RutaProtegida>} />
       </Routes>

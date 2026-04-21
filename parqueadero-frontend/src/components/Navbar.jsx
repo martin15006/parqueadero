@@ -7,7 +7,7 @@ export default function Navbar() {
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('usuario');
-        navigate('/login');
+        navigate('/landing');
     };
     return (
         <nav className='navbar'>

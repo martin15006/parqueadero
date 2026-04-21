@@ -6,7 +6,7 @@
 
 body {
   font-family: 'Segoe UI', sans-serif;
-  background: #4a973b;
+  background: #4086ab;
   color: #333;
   min-height: 100vh;}
 
@@ -83,14 +83,14 @@ body {
 }
 
 .btn-primary {
-  background: #4a973b;
+  background: #2b2ba3;
   color: white;
   width: 100%;
   padding: 12px;
 }
 
 .btn-success {
-  background: #2ecc71;
+  background: #3998d3;
   color: white;
 }
 
@@ -113,7 +113,7 @@ body {
 
 /* Navbar */
 .navbar {
-  background: #316e24;
+  background: #2b2ba3;
   color: white;
   padding: 14px 32px;
   display: flex;
@@ -129,7 +129,9 @@ body {
 }
 
 .navbar a:hover {
-  color: #3a742e;
+  color: white;
+  transition: 0.3s;
+  font-size: 20px;
 }
 
 .navbar-usuario {
@@ -170,7 +172,7 @@ body {
 }
 
 .tabla th {
-  background: #4a973b;
+  background: #2b2ba3;
   color: white;
   padding: 12px 16px;
   text-align: center;
@@ -205,9 +207,9 @@ body {
 }
 
 .alerta-exito {
-  background: #eafaf1;
-  color: #1e8449;
-  border: 1px solid #a9dfbf;
+  background: #3998d3;
+  color: #111;
+  border: 1px solid #0095ff;
 }
 
 
@@ -219,7 +221,7 @@ body {
 }
 
 .alerta-exito:hover {
-  background: #1e8449;
+  background: #2b00ff;
   color: #eafaf1;
   border: 1px solid #a9dfbf;
 }
