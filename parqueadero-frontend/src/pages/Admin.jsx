@@ -193,7 +193,7 @@ export default function Admin() {
                 {estadisticas && (
                     <>
                         {/* tarjetas  */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                        <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '24px' }}>
                             {[
                                 { label: '🚗 Adentro ahora', valor: estadisticas.adentro, color: '#2ecc71' },
                                 { label: '🟢 Entradas hoy', valor: estadisticas.entradasHoy, color: '#4361ee' },
@@ -247,58 +247,61 @@ export default function Admin() {
                 {/* Usuarios */}
                 <div className="card">
                     <h3 style={{ marginBottom: '16px' }}>Usuarios registrados</h3>
-                    <table className="tabla">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Email</th>
-                                <th>Rol</th>
-                                <th>Fecha registro</th>
-                                <th>Cambiar Rol</th>
-                                <th>Perfil</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {usuarios.map(u => (
-                                <tr key={u.id}>
-                                    <td>{u.nombre?.trim()}</td>
-                                    <td>{u.email?.trim()}</td>
-                                    <td>{u.role}</td>
-                                    <td>{new Date(u.created_at).toLocaleDateString()}</td>
-                                    <td>
-                                        <select
-                                            value={u.role}
-                                            onChange={async (e) => {
-                                                try {
-                                                    await api.put(`/usuarios/${u.id}/rol`, { role: e.target.value });
-                                                    cargarDatos();
-                                                } catch {
-                                                    alert('Error al cambiar rol');
-                                                }
-                                            }}
-                                            style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ddd' }}
-                                        >
-                                            <option value="user">User</option>
-                                            <option value="celador">Celador</option>
-                                            <option value="admin">Admin</option>
-                                        </select>
-                                    </td>
-                                    <td><button
-                                        className="btn btn-primary btn-sm"
-                                        onClick={() => navigate(`/usuarios/${u.id}/perfil`)}>
-                                        Ver perfil
-                                    </button>
-                                    </td>
+                    <div className="tabla-contenedor">
+
+                        <table className="tabla">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Rol</th>
+                                    <th>Fecha registro</th>
+                                    <th>Cambiar Rol</th>
+                                    <th>Perfil</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {usuarios.map(u => (
+                                    <tr key={u.id}>
+                                        <td>{u.nombre?.trim()}</td>
+                                        <td>{u.email?.trim()}</td>
+                                        <td>{u.role}</td>
+                                        <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                                        <td>
+                                            <select
+                                                value={u.role}
+                                                onChange={async (e) => {
+                                                    try {
+                                                        await api.put(`/usuarios/${u.id}/rol`, { role: e.target.value });
+                                                        cargarDatos();
+                                                    } catch {
+                                                        alert('Error al cambiar rol');
+                                                    }
+                                                }}
+                                                style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ddd' }}
+                                            >
+                                                <option value="user">User</option>
+                                                <option value="celador">Celador</option>
+                                                <option value="admin">Admin</option>
+                                            </select>
+                                        </td>
+                                        <td><button
+                                            className="btn btn-primary btn-sm"
+                                            onClick={() => navigate(`/usuarios/${u.id}/perfil`)}>
+                                            Ver perfil
+                                        </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div className="card">
                     <h3 style={{ marginBottom: '16px' }}>Historial de entradas y salidas</h3>
 
                     {/* filtros  */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '12px', marginBottom: '20px' }}>
+                    <div className="filtros-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '12px', marginBottom: '20px' }}>
                         <input
                             placeholder="Buscar por placa"
                             value={filtros.placa}
@@ -325,53 +328,55 @@ export default function Admin() {
                         </button>
                     </div>
 
-                    <table className="tabla">
-                        <thead>
-                            <tr>
-                                <th>Tipo</th>
-                                <th>Placa</th>
-                                <th>Marca</th>
-                                <th>Modelo</th>
-                                <th>Propietario</th>
-                                <th>Celador</th>
-                                <th>Fecha</th>
-                                <th>Eliminar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {historial.map(r => (
-                                <tr key={r.id}>
-                                    <td>
-                                        {r.tipo_registro?.trim().toLowerCase() === 'entrada'
-                                            ? '🟢 Entrada'
-                                            : '🔴 Salida'}
-                                    </td>
-                                    <td>{r.placa?.trim()}</td>
-                                    <td>{r.marca?.trim()}</td>
-                                    <td>{r.modelo?.trim()}</td>
-                                    <td>{r.propietario?.trim()}</td>
-                                    <td>{r.celador?.trim() || '-'}</td>
-                                    <td>{new Date(r.fecha).toLocaleString()}</td>
-                                    <td>
-                                        <button
-                                            className="btn btn-danger btn-sm"
-                                            onClick={async () => {
-                                                if (window.confirm('¿Eliminar este registro del historial?')) {
-                                                    try {
-                                                        await api.delete(`/registros/${r.id}`);
-                                                        cargarDatos();
-                                                    } catch {
-                                                        alert('Error al eliminar');
-                                                    }
-                                                }
-                                            }}>
-                                            Eliminar
-                                        </button>
-                                    </td>
+                    <div className="tabla-contenedor">
+                        <table className="tabla">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Placa</th>
+                                    <th>Marca</th>
+                                    <th>Modelo</th>
+                                    <th>Propietario</th>
+                                    <th>Celador</th>
+                                    <th>Fecha</th>
+                                    <th>Eliminar</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {historial.map(r => (
+                                    <tr key={r.id}>
+                                        <td>
+                                            {r.tipo_registro?.trim().toLowerCase() === 'entrada'
+                                                ? '🟢 Entrada'
+                                                : '🔴 Salida'}
+                                        </td>
+                                        <td>{r.placa?.trim()}</td>
+                                        <td>{r.marca?.trim()}</td>
+                                        <td>{r.modelo?.trim()}</td>
+                                        <td>{r.propietario?.trim()}</td>
+                                        <td>{r.celador?.trim() || '-'}</td>
+                                        <td>{new Date(r.fecha).toLocaleString()}</td>
+                                        <td>
+                                            <button
+                                                className="btn btn-danger btn-sm"
+                                                onClick={async () => {
+                                                    if (window.confirm('¿Eliminar este registro del historial?')) {
+                                                        try {
+                                                            await api.delete(`/registros/${r.id}`);
+                                                            cargarDatos();
+                                                        } catch {
+                                                            alert('Error al eliminar');
+                                                        }
+                                                    }
+                                                }}>
+                                                Eliminar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
 
@@ -379,50 +384,52 @@ export default function Admin() {
                 {/* Vehículos */}
                 <div className="card">
                     <h3 style={{ marginBottom: '16px' }}>Todos los vehículos</h3>
-                    <table className="tabla">
-                        <thead>
-                            <tr>
-                                <th>Placa</th>
-                                <th>Tipo</th>
-                                <th>Marca</th>
-                                <th>Modelo</th>
-                                <th>Color</th>
-                                <th>Propietario</th>
-                                <th>Email</th>
-                                <th>Eliminar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {vehiculos.map(v => (
-                                <tr key={v.id}>
-                                    <td>{v.placa?.trim()}</td>
-                                    <td>{v.tipo?.trim()}</td>
-                                    <td>{v.marca?.trim()}</td>
-                                    <td>{v.modelo?.trim()}</td>
-                                    <td>{v.color?.trim()}</td>
-                                    <td>{v.nombre?.trim()}</td>
-                                    <td>{v.email?.trim()}</td>
-                                    <td>
-                                        <button
-                                            className="btn btn-danger btn-sm"
-                                            onClick={async () => {
-                                                if (window.confirm(`¿Eliminar vehículo ${v.placa}?`)) {
-                                                    try {
-                                                        await api.delete(`/vehiculos/${v.id}`);
-                                                        cargarDatos();
-                                                    } catch {
-                                                        alert('Error al eliminar');
-                                                    }
-                                                }
-                                            }}
-                                        >
-                                            Eliminar
-                                        </button>
-                                    </td>
+                    <div className="tabla-contenedor">
+                        <table className="tabla">
+                            <thead>
+                                <tr>
+                                    <th>Placa</th>
+                                    <th>Tipo</th>
+                                    <th>Marca</th>
+                                    <th>Modelo</th>
+                                    <th>Color</th>
+                                    <th>Propietario</th>
+                                    <th>Email</th>
+                                    <th>Eliminar</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {vehiculos.map(v => (
+                                    <tr key={v.id}>
+                                        <td>{v.placa?.trim()}</td>
+                                        <td>{v.tipo?.trim()}</td>
+                                        <td>{v.marca?.trim()}</td>
+                                        <td>{v.modelo?.trim()}</td>
+                                        <td>{v.color?.trim()}</td>
+                                        <td>{v.nombre?.trim()}</td>
+                                        <td>{v.email?.trim()}</td>
+                                        <td>
+                                            <button
+                                                className="btn btn-danger btn-sm"
+                                                onClick={async () => {
+                                                    if (window.confirm(`¿Eliminar vehículo ${v.placa}?`)) {
+                                                        try {
+                                                            await api.delete(`/vehiculos/${v.id}`);
+                                                            cargarDatos();
+                                                        } catch {
+                                                            alert('Error al eliminar');
+                                                        }
+                                                    }
+                                                }}
+                                            >
+                                                Eliminar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </>

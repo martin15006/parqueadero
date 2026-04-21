@@ -9,7 +9,7 @@ export default function Navbar() {
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('usuario');
-        navigate('/landing');
+        navigate('/Landing');
     };
     return (
         <nav className='navbar' style={{ flexDirection: 'column', padding: '0' }}>

@@ -64,30 +64,32 @@ export default function MiHistorial() {
                     {historial.length === 0 ? (
                         <p style={{ color: '#888', textAlign: 'center', padding: '20px' }}>No hay registros de acceso.</p>
                     ) : (
-                        <table className='tabla'>
-                            <thead>
-                                <tr>
-                                    <th>Tipo</th>
-                                    <th>Placa</th>
-                                    <th>Marca</th>
-                                    <th>Modelo</th>
-                                    <th>Celador</th>
-                                    <th>Fecha y Hora</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {historial.map(r => (
-                                    <tr key={r.id}>
-                                        <td>{r.tipo_registro === 'entrada' ? '🟢Entrada' : '🔴Salida'}</td>
-                                        <td>{r.placa}</td>
-                                        <td>{r.marca}</td>
-                                        <td>{r.modelo}</td>
-                                        <td>{r.celador || '-'}</td>
-                                        <td>{new Date(r.fecha).toLocaleString()}</td>
+                        <div className='tabla-contenedor'>
+                            <table className='tabla'>
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Placa</th>
+                                        <th>Marca</th>
+                                        <th>Modelo</th>
+                                        <th>Celador</th>
+                                        <th>Fecha y Hora</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {historial.map(r => (
+                                        <tr key={r.id}>
+                                            <td>{r.tipo_registro === 'entrada' ? '🟢Entrada' : '🔴Salida'}</td>
+                                            <td>{r.placa}</td>
+                                            <td>{r.marca}</td>
+                                            <td>{r.modelo}</td>
+                                            <td>{r.celador || '-'}</td>
+                                            <td>{new Date(r.fecha).toLocaleString()}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     )}
                 </div>
             </div>

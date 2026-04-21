@@ -168,39 +168,43 @@ export default function Celador() {
                         </div>
 
                         <h3 style={{ marginBottom: '20px' }}>Informacion del {vehiculo.esVisitante ? 'Visitante' : 'Propietario'}</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                        <div className='filtros-grid' style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
 
                             <div>
                                 <h4 style={{ marginBottom: '12px', color: '#4361ee' }}>
                                     {vehiculo.esVisitante ? 'Visitante' : 'Propietario'}
                                 </h4>
-                                <table className="tabla">
-                                    <tbody>
-                                        <tr><td><strong>Nombre</strong></td><td>{vehiculo.nombre}</td></tr>
-                                        <tr><td><strong>Apellido</strong></td><td>{vehiculo.apellido || '-'}</td></tr>
-                                        <tr><td><strong>Cedula</strong></td><td>{vehiculo.esVisitante ? (vehiculo.documento || '-') : (vehiculo.cedula || '-')}</td></tr>
-                                        <tr><td><strong>Telefono</strong></td><td>{vehiculo.telefono || '-'}</td></tr>
+                                <div className="tabla-contenedor">
+                                    <table className="tabla">
+                                        <tbody>
+                                            <tr><td><strong>Nombre</strong></td><td>{vehiculo.nombre}</td></tr>
+                                            <tr><td><strong>Apellido</strong></td><td>{vehiculo.apellido || '-'}</td></tr>
+                                            <tr><td><strong>Cedula</strong></td><td>{vehiculo.esVisitante ? (vehiculo.documento || '-') : (vehiculo.cedula || '-')}</td></tr>
+                                            <tr><td><strong>Telefono</strong></td><td>{vehiculo.telefono || '-'}</td></tr>
 
-                                        <tr><td><strong>correo</strong></td><td>{vehiculo.esVisitante ? (vehiculo.correo || '-') : (vehiculo.email || '-')}</td></tr>
-                                        {vehiculo.esVisitante && (
-                                            <tr><td><strong>Descripcion</strong></td><td>{vehiculo.descripcion || '-'}</td></tr>
-                                        )}
+                                            <tr><td><strong>correo</strong></td><td>{vehiculo.esVisitante ? (vehiculo.correo || '-') : (vehiculo.email || '-')}</td></tr>
+                                            {vehiculo.esVisitante && (
+                                                <tr><td><strong>Descripcion</strong></td><td>{vehiculo.descripcion || '-'}</td></tr>
+                                            )}
 
-                                    </tbody>
-                                </table>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                             {/* datos del vehiculo  */}
                             <div>
                                 <h4 style={{ marginBottom: '12px', color: '#4488e1' }}>Vehiculo</h4>
-                                <table className="tabla">
-                                    <tbody>
-                                        <tr><td><strong>Placa</strong></td><td>{vehiculo.placa || '-'}</td></tr>
-                                        <tr><td><strong>Tipo</strong></td><td>{vehiculo.tipo_vehiculo || vehiculo.tipo || '-'}</td></tr>
-                                        <tr><td><strong>Marca</strong></td><td>{vehiculo.marca || '-'}</td></tr>
-                                        <tr><td><strong>Modelo</strong></td><td>{vehiculo.modelo || '-'}</td></tr>
-                                        <tr><td><strong>Color</strong></td><td>{vehiculo.color || vehiculo.descripcion || '-'}</td></tr>
-                                    </tbody>
-                                </table>
+                                <div className="tabla-contenedor">
+                                    <table className="tabla">
+                                        <tbody>
+                                            <tr><td><strong>Placa</strong></td><td>{vehiculo.placa || '-'}</td></tr>
+                                            <tr><td><strong>Tipo</strong></td><td>{vehiculo.tipo_vehiculo || vehiculo.tipo || '-'}</td></tr>
+                                            <tr><td><strong>Marca</strong></td><td>{vehiculo.marca || '-'}</td></tr>
+                                            <tr><td><strong>Modelo</strong></td><td>{vehiculo.modelo || '-'}</td></tr>
+                                            <tr><td><strong>Color</strong></td><td>{vehiculo.color || vehiculo.descripcion || '-'}</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 

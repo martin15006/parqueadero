@@ -6,7 +6,7 @@ import api from '../api/axios';
 export default function Visitantes() {
     const [visitantes, setVisitantes] = useState([]);
     const [form, setForm] = useState({
-        nombre: '', apellido: '', documento: '', telefono: '',correo:'',
+        nombre: '', apellido: '', documento: '', telefono: '', correo: '',
         tipo_vehiculo: 'carro', placa: '', marca: '', modelo: '',
         color: '', descripcion: ''
     });
@@ -109,7 +109,7 @@ export default function Visitantes() {
                 <div className='card'>
                     <h3 style={{ marginBottom: '16px' }}>Registrar nuevo visitante</h3>
                     <form onSubmit={handleSubmit}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div className='form-grid' style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                             <div className='form-grupo'>
                                 <label>Nombre</label>
                                 <input name='nombre' value={form.nombre} onChange={handleChange} required />
@@ -211,61 +211,65 @@ export default function Visitantes() {
                     {adentro.length === 0 ? (
                         <p style={{ color: '#888' }}>No hay visitantes actualmente.</p>
                     ) : (
-                        <table className='tabla'>
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Documento</th>
-                                    <th>Placa</th>
-                                    <th>Vehiculo</th>
-                                    <th>Entrada</th>
-                                    <th>Accion</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {adentro.map(v => (
-                                    <tr key={v.id}>
-                                        <td>{v.nombre}</td>
-                                        <td>{v.documento || '-'}</td>
-                                        <td>{v.placa || '-'}</td>
-                                        <td>{v.tipo_vehiculo} {v.marca} {v.modelo}</td>
-                                        <td>{new Date(v.fecha_entrada).toLocaleString()}</td>
-                                        <td>
-                                            <button className='btn btn-danger btn-sm'
-                                                onClick={() => registrarSalida(v.id, v.nombre)}>
-                                                Registrar Salida
-                                            </button>
-                                        </td>
+                        <div className='tabla-contenedor'>
+                            <table className='tabla'>
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Documento</th>
+                                        <th>Placa</th>
+                                        <th>Vehiculo</th>
+                                        <th>Entrada</th>
+                                        <th>Accion</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {adentro.map(v => (
+                                        <tr key={v.id}>
+                                            <td>{v.nombre}</td>
+                                            <td>{v.documento || '-'}</td>
+                                            <td>{v.placa || '-'}</td>
+                                            <td>{v.tipo_vehiculo} {v.marca} {v.modelo}</td>
+                                            <td>{new Date(v.fecha_entrada).toLocaleString()}</td>
+                                            <td>
+                                                <button className='btn btn-danger btn-sm'
+                                                    onClick={() => registrarSalida(v.id, v.nombre)}>
+                                                    Registrar Salida
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     )}
                 </div>
                 {/* historial visitantes  */}
                 {afuera.length > 0 && (
                     <div className='card'>
                         <h3 style={{ marginBottom: '16px' }}>Visitantes que registraron la Salida ({afuera.length})</h3>
-                        <table className='tabla'>
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Placa</th>
-                                    <th>Entrada</th>
-                                    <th>Salida</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {afuera.map(v => (
-                                    <tr key={v.id}>
-                                        <td>{v.nombre}</td>
-                                        <td>{v.placa || '-'}</td>
-                                        <td>{new Date(v.fecha_entrada).toLocaleString()}</td>
-                                        <td>{v.fecha_salida ? new Date(v.fecha_salida).toLocaleString() : '-'}</td>
+                        <div className='tabla-contenedor'>
+                            <table className='tabla'>
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Placa</th>
+                                        <th>Entrada</th>
+                                        <th>Salida</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {afuera.map(v => (
+                                        <tr key={v.id}>
+                                            <td>{v.nombre}</td>
+                                            <td>{v.placa || '-'}</td>
+                                            <td>{new Date(v.fecha_entrada).toLocaleString()}</td>
+                                            <td>{v.fecha_salida ? new Date(v.fecha_salida).toLocaleString() : '-'}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
             </div>

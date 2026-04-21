@@ -99,7 +99,7 @@ export default function Dashboard() {
                 <div className="card">
                     <h3 style={{ marginBottom: '16px' }}>Registrar nuevo vehiculo</h3>
                     <form onSubmit={handleSubmit}>
-                        <div style={{ display: "grid", gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div className="form-grid" style={{ display: "grid", gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                             <div className="form-grupo">
                                 <label>Placa</label>
                                 <input name="placa" value={form.placa} onChange={handlechange} required />
@@ -146,58 +146,60 @@ export default function Dashboard() {
                     {vehiculos.length === 0 ? (
                         <p style={{ color: '#888' }}>No tienes vehiculos registrados aún.</p>
                     ) : (
-                        <table className="tabla">
-                            <thead>
-                                <tr>
-                                    <th>Placa</th>
-                                    <th>Marca</th>
-                                    <th>Modelo</th>
-                                    <th>Color</th>
-                                    <th>Tipo</th>
-                                    <th>QR</th>
-                                    <th>Descargar</th>
-                                    <th>Editar</th>
-                                    {esAdmin && <th>Eliminar</th>}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {vehiculos.map(v => (
-                                    <tr key={v.id}>
-                                        <td>{v.placa}</td>
-                                        <td>{v.marca}</td>
-                                        <td>{v.modelo}</td>
-                                        <td>{v.color}</td>
-                                        <td>{v.tipo}</td>
-                                        <td>
-                                            <button className="btn btn-primary btn-sm" onClick={() => {
-                                                setQrActual(v.qr_code);
-                                                setPlacaActual(v.placa);
-                                            }}>Ver QR
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button className="btn btn-success btn-sm"
-                                                onClick={() => descargarQR(v.qr_code, v.placa)}>
-                                                Descargar
-                                            </button>
-
-                                        </td>
-                                        <td>
-                                            <button className="btn btn-warning btn-sm" style={{marginTop: '0'}}  onClick={() => {
-                                                setVehiculoEditando(v);
-                                                setFormEditar({ marca: v.marca || '', modelo: v.modelo || '', color: v.color || '', tipo: v.tipo || 'carro' });
-                                            }}>Editar</button>
-                                        </td>
-                                        {esAdmin && (
-                                            <td>
-                                                <button className="btn btn-danger btn-sm" onClick={() => { eliminarVehiculo(v.id) }}>Eliminar</button>
-                                            </td>)}
-
-
+                        <div className="tabla-contenedor">
+                            <table className="tabla">
+                                <thead>
+                                    <tr>
+                                        <th>Placa</th>
+                                        <th>Marca</th>
+                                        <th>Modelo</th>
+                                        <th>Color</th>
+                                        <th>Tipo</th>
+                                        <th>QR</th>
+                                        <th>Descargar</th>
+                                        <th>Editar</th>
+                                        {esAdmin && <th>Eliminar</th>}
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {vehiculos.map(v => (
+                                        <tr key={v.id}>
+                                            <td>{v.placa}</td>
+                                            <td>{v.marca}</td>
+                                            <td>{v.modelo}</td>
+                                            <td>{v.color}</td>
+                                            <td>{v.tipo}</td>
+                                            <td>
+                                                <button className="btn btn-primary btn-sm" onClick={() => {
+                                                    setQrActual(v.qr_code);
+                                                    setPlacaActual(v.placa);
+                                                }}>Ver QR
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <button className="btn btn-success btn-sm"
+                                                    onClick={() => descargarQR(v.qr_code, v.placa)}>
+                                                    Descargar
+                                                </button>
+
+                                            </td>
+                                            <td>
+                                                <button className="btn btn-warning btn-sm" style={{ marginTop: '0' }} onClick={() => {
+                                                    setVehiculoEditando(v);
+                                                    setFormEditar({ marca: v.marca || '', modelo: v.modelo || '', color: v.color || '', tipo: v.tipo || 'carro' });
+                                                }}>Editar</button>
+                                            </td>
+                                            {esAdmin && (
+                                                <td>
+                                                    <button className="btn btn-danger btn-sm" onClick={() => { eliminarVehiculo(v.id) }}>Eliminar</button>
+                                                </td>)}
+
+
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     )}
                 </div>
                 {vehiculoEditando && (
