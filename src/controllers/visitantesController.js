@@ -20,7 +20,7 @@ const registrarVisitantes = async (req, res) => {
 
         // verificar que la cedula no pertenezca a ningun usuario registrado
         if (documento) {
-            const [cedulaUsuario] = await bd.query(
+            const [cedulaUsuario] = await db.query(
                 `SELECT id FROM usuarios WHERE cedula = ?`,
                 [documento]
             );
