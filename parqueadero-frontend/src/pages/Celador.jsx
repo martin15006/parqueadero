@@ -47,7 +47,7 @@ export default function Celador() {
                             // Es un QR de visitante 
                             try {
                                 const res = await api.post('/visitantes/entrada-qr', { qr_data: textoQR });
-                                setVehiculo({ ...res.data.visitantes, esVisitante: true });
+                                setVehiculo({ ...res.data.visitante, esVisitante: true });
                                 setExito('Visitante identificado- Confirma la entrada');
                             } catch (err) {
                                 setError(err.response?.data?.mensaje || 'Error al procesar QR de visitante');
@@ -132,6 +132,7 @@ export default function Celador() {
                     )}
                 </div>
                 {/* buscar por placa  */}
+
                 <div className="card">
                     <h3 style={{ marginBottom: '16px' }}>Buscar por la placa</h3>
                     <form onSubmit={(e) => {
@@ -140,13 +141,13 @@ export default function Celador() {
                     }}
                         style={{ display: 'flex', gap: '12px' }}>
                         <input
-                            style={{ flex: 1, padding: '10px 14px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem' }}
+                            style={{ flex: 1, padding: '10px 14px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem', overflow: 'auto', width: '100%' }}
                             placeholder="EJ: ABC123"
                             value={placa}
                             onChange={e => setPlaca(e.target.value.toUpperCase())}
                             required
                         />
-                        <button type="submit" className="btn btn-primary" style={{ width: 'auto' }}>
+                        <button type="submit" className="btn btn-primary" style={{ width: 'auto', overflow: 'auto' }}>
                             Buscar
                         </button>
                     </form>
@@ -170,11 +171,11 @@ export default function Celador() {
                         <h3 style={{ marginBottom: '20px' }}>Informacion del {vehiculo.esVisitante ? 'Visitante' : 'Propietario'}</h3>
                         <div className='filtros-grid' style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
 
-                            <div>
+                            <div className="tabla-contenedor">
                                 <h4 style={{ marginBottom: '12px', color: '#4361ee' }}>
                                     {vehiculo.esVisitante ? 'Visitante' : 'Propietario'}
                                 </h4>
-                                <div className="tabla-contenedor">
+                                <div className='tabla-contenedor'>
                                     <table className="tabla">
                                         <tbody>
                                             <tr><td><strong>Nombre</strong></td><td>{vehiculo.nombre}</td></tr>
@@ -262,14 +263,16 @@ export default function Celador() {
                             ) : (
                                 // para usuarios registrados, mostrar entrada y salida 
                                 <>
-                                    <button className="btn btn-success" style={{ flex: 1, padding: '14px' }}
-                                        onClick={() => registrarMovimiento('entrada')}>
-                                        Registrar Entrada
-                                    </button>
-                                    <button className="btn btn-danger" style={{ flex: 1, padding: '14px' }}
-                                        onClick={() => registrarMovimiento('salida')}>
-                                        Registrar Salida
-                                    </button>
+                                    <div style={{ overflow: 'auto', width: '100%' }}>
+                                        <button className="btn btn-success" style={{ flex: 1, padding: '14px' }}
+                                            onClick={() => registrarMovimiento('entrada')}>
+                                            Registrar Entrada
+                                        </button>
+                                        <button className="btn btn-danger" style={{ flex: 1, padding: '14px' }}
+                                            onClick={() => registrarMovimiento('salida')}>
+                                            Registrar Salida
+                                        </button>
+                                    </div>
                                 </>
                             )}
                         </div>

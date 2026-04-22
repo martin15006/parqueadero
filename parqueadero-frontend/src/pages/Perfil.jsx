@@ -59,34 +59,36 @@ export default function Perfil() {
 
     return (
         <>
-            <Navbar />
-            <div className='pagina'>
-                <h1>Mi Perfil</h1>
-                {error && <div className='alerta alerta-error'>{error}</div>}
-                {exito && <div className='alerta alerta-exito'>{exito}</div>}
+            <Navbar />            
+                <div className='pagina'>
+                    <h1>Mi Perfil</h1>
+                    {error && <div className='alerta alerta-error'>{error}</div>}
+                    {exito && <div className='alerta alerta-exito'>{exito}</div>}
 
-                {/* Datos actuales */}
-                <div className='card'>
-                    <div className='top-bar'>
-                        <h3>Mis datos</h3>
-                        <button
-                            className='btn btn-primary btn-sm'
-                            onClick={() => setEditando(!editando)}>
-                            {editando ? 'Cancelar' : 'Editar'}
-                        </button>
+                    {/* Datos actuales */}
+                    <div className='card'>
+                        <div className='top-bar'>
+                            <h3>Mis datos</h3>
+                            <button
+                                className='btn btn-primary btn-sm'
+                                onClick={() => setEditando(!editando)}>
+                                {editando ? 'Cancelar' : 'Editar'}
+                            </button>
+                        </div>
+                        <div className='tabla-contenedor'>
+                            <table className='tabla'>
+                                <tbody>
+                                    <tr><td><strong>Nombre</strong></td><td>{perfil.nombre}</td></tr>
+                                    <tr><td><strong>Apellido</strong></td><td>{perfil.apellido || '-'}</td></tr>
+                                    <tr><td><strong>Cedula</strong></td><td>{perfil.cedula || '-'}</td></tr>
+                                    <tr><td><strong>Telefono</strong></td><td>{perfil.telefono}</td></tr>
+                                    <tr><td><strong>Email</strong></td><td>{perfil.email}</td></tr>
+                                    <tr><td><strong>Rol</strong></td><td>{perfil.role}</td></tr>
+                                    <tr><td><strong>Miembro desde</strong></td><td>{new Date(perfil.created_at).toLocaleDateString()}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <table className='tabla'>
-                        <tbody>
-                            <tr><td><strong>Nombre</strong></td><td>{perfil.nombre}</td></tr>
-                            <tr><td><strong>Apellido</strong></td><td>{perfil.apellido || '-'}</td></tr>
-                            <tr><td><strong>Cedula</strong></td><td>{perfil.cedula || '-'}</td></tr>
-                            <tr><td><strong>Telefono</strong></td><td>{perfil.telefono}</td></tr>
-                            <tr><td><strong>Email</strong></td><td>{perfil.email}</td></tr>
-                            <tr><td><strong>Rol</strong></td><td>{perfil.role}</td></tr>
-                            <tr><td><strong>Miembro desde</strong></td><td>{new Date(perfil.created_at).toLocaleDateString()}</td></tr>
-                        </tbody>
-                    </table>
-                </div>
 
                 {/* formulario de edicion  */}
                 {editando && (

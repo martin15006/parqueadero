@@ -238,36 +238,110 @@ body {
   margin-bottom: 20px;
 }
 
-/* Responsive general  */
+/* General: Ajustes globales para mejorar la visualización en pantallas pequeñas */
 @media (max-width: 768px) {
 
-  /* Tablas con scroll horizoltal  */
+  /* Hacer que las cards se apilen en una sola columna en dispositivos pequeños */
+  .pagina {
+    padding: 8px; /* Reducir el relleno para dispositivos móviles */
+  }
+
+  .card {
+    margin-bottom: 16px; /* Espaciado entre las tarjetas */
+    padding: 16px;
+    width: 100%;
+  }
+
+  /* Estilo de la tabla en pantallas pequeñas */
   .tabla-contenedor {
     overflow-x: auto;
-    -webkit-overflow-scrolling: toych;
+    -webkit-overflow-scrolling: touch; /* Corregido 'toych' a 'touch' */
     border-radius: 10px;
+    width: 100%;
+    margin-bottom: 16px; /* Añadido margen para que la tabla no esté pegada al borde */
   }
 
   .tabla {
-    min-width: 600px;
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Asegura que la tabla no se desborde */
   }
 
-  /* cards en columna  */
-  .pagina{
-    padding: 16px;
+  .tabla td,
+  .tabla th {
+    padding: 8px; /* Aumentar el espacio para mejorar la legibilidad */
+    text-align: left;
+    font-size: 0.9rem; /* Reducir el tamaño de la fuente */
+    word-wrap: break-word; /* Asegura que el texto largo se ajuste */
+    overflow-wrap: break-word; /* Otra propiedad para ajustar texto largo */
   }
 
-  .stats-grid{
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-/* Formularios en una sola comunna 
-*/
-  .form-grid{
-   grid-template-columns: 1fr !important;
+  .tabla tr {
+    border-bottom: 1px solid #ddd; /* Añadir líneas separadoras entre filas */
   }
 
-  /* Filtros en columna  */
-  .filtros-grid{
+  /* Hacer que los textos largos se ajusten correctamente */
+  .tabla td,
+  .tabla th {
+    font-size: 0.9rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Formularios en una sola columna */
+  .form-grupo {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+
+  .form-grupo label {
+    margin-bottom: 8px;
+    font-size: 1rem;
+  }
+
+  .form-grupo input {
+    padding: 10px;
+    font-size: 1rem;
+    width: 100%;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+
+  /* Ajuste del botón de guardar cambios */
+  .btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    margin-top: 16px;
+  }
+
+  /* Asegurar que las tarjetas se vean bien cuando son más grandes que el contenido */
+  .stats-grid {
+    grid-template-columns: 1fr !important; /* Forzar a que las columnas sean de una sola fracción */
+  }
+
+  /* Formularios con un solo campo en pantallas pequeñas */
+  .form-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  /* Filtros en columna para pantallas pequeñas */
+  .filtros-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Top bar que contiene el botón de edición */
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Asegurarse de que el contenido se ajuste cuando sea necesario */
+  }
+
+  /* Hacer que los títulos se vean bien en pantallas pequeñas */
+  h1, h3 {
+    font-size: 1.25rem; /* Reducir el tamaño del texto para caber mejor en pantallas pequeñas */
+    text-align: center; /* Alinear al centro para una mejor estética */
   }
 }

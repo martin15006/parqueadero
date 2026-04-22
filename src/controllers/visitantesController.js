@@ -102,9 +102,6 @@ const registrarEntradaVisitante = async (req, res) => {
         } catch {
             return res.status(400).json({ mensaje: 'QR invalido' });
         }
-        if (!datos.placa) {
-            return res.status(400).json({ mensaje: 'QR invalido: no contiene placa' });
-        }
 
         if (datos.tipo !== 'visitante') {
             return res.status(400).json({ mensaje: 'Este QR no es de visitante' });
