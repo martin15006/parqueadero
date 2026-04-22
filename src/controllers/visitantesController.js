@@ -7,16 +7,39 @@ const registrarVisitantes = async (req, res) => {
         const placaFormateada = placa ? placa.toUpperCase().trim() : null;
         const admin_id = req.usuario.id;
 
-        // si tiene placa, verificar que no este adentro o pendiente 
+        // Verificar que la placa no pertenesca a ningun usuario registrado 
         if (placaFormateada) {
-            const [activo] = await db.query(
-                `SELECT id FROM visitantes WHERE placa = ? AND estado IN ('pendiente', 'adentro')`,
+            const [placaUsuarios] = await db.query(
+                `SELECT id FROM vehiculos WHERE placa = ? `,
                 [placaFormateada]
             );
-            if (activo.length > 0) {
-                return res.status(400).json({ mensaje: 'Ya existe un visitante activo con esa placa. Debe registrar su salida primero.' });
+            if (placaUsuarios.length > 0) {
+                return res.status(400).json({ mensaje: '. Esa placa ya esta registrada por un usuario del sistema.' });
             }
         }
+
+        // verificar que la cedula no pertenezca a ningun usuario registrado
+        if (documento) {
+            const [cedulaUsuario] = await bd.query(
+                `SELECT id FROM usuarios WHERE cedula = ?`,
+                [documento]
+            );
+            if (cedulaUsuario.length > 0) {
+                return res.status(400).json({ mensaje: 'Esa cedula ya esta registrada en el sistema' });
+            }
+        }
+
+        // verificar que el correo no pertenesca a ningun usuario 
+        if (correo) {
+            const [correoUsuario] = await db.query(
+                `SELECT id FROM usuarios WHERE email = ?`,
+                [correo]
+            );
+            if (correoUsuario.length > 0) {
+                return res.status(400).json({ mensaje: 'Ese correo ya se encuentra registrado en el sistema' });
+            }
+        }
+
         // generar QR temportal con datos del visitante 
         const datosQR = JSON.stringify({
             tipo: 'visitante',
@@ -218,4 +241,4 @@ const registrarEntradaById = async (req, res) => {
     }
 };
 
-module.exports = { registrarVisitantes, getVisitantes, registrarEntradaVisitante, registrarSalidaVisitante, buscarVisitantePorPlaca, registrarEntradaById};
+module.exports = { registrarVisitantes, getVisitantes, registrarEntradaVisitante, registrarSalidaVisitante, buscarVisitantePorPlaca, registrarEntradaById };

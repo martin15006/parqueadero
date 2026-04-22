@@ -3,9 +3,16 @@ const bcrypt = require('bcrypt');
 
 const getUsuarios = async (req, res) => {
     try {
-        const [usuarios] = await db.query(
-            'SELECT id, nombre, email, role, created_at FROM usuarios'
-        );
+        const { buscar } = req.query;
+        let query = 'SELECT id, nombre, apellido, cedula, telefono, email, role, created_at FROM usuarios ';
+        let valores = [];
+
+        if (buscar) {
+            query += 'WHERE nombre LIKE ? OR cedula LIKE ? OR email LIKE ?';
+            valores = [`%${buscar}%`, `%${buscar}%`, `%${buscar}%`];
+        }
+
+        const [usuarios] = await db.query(query, valores);
         res.json(usuarios);
     } catch (error) {
         console.error(error);
@@ -92,13 +99,22 @@ const getMiPerfil = async (req, res) => {
 
 const getTodosVehiculos = async (req, res) => {
     try {
-        const [vehiculos] = await db.query(
-            `SELECT v.id, v.placa, v.marca, v.modelo, v.color, v.tipo,
+
+        const { buscar } = req.query;
+        let query = `SELECT v.id, v.marca, v.modelo, v.color, v.tipo,
             u.nombre, u.email
             FROM vehiculos v
-            JOIN usuarios u ON v.usuario_id = u.id
-            ORDER BY v.created_at DESC`
-        );
+            JOIN usuarios u ON v.usuario_id = u.id`;
+
+        let valores = [];
+
+        if (buscar) {
+            query += ` WHERE v.placa LIKE ? OR v.marca LIKE ? OR u.nombre LIKE ?`;
+            valores = [`%${buscar}%`, `%${buscar}%`, `%${buscar}%`];
+        }
+
+        query += ' ORDER BY v.created_at DESC';
+        const [vehiculos] = await db.query(query, valores);
         res.json(vehiculos);
     } catch (error) {
         console.error(error);
@@ -178,4 +194,4 @@ const editarPerfilUsuario = async (req, res) => {
     }
 };
 
-module.exports = { getUsuarios, cambiarRol, getMiPerfil, actualizarPerfil, getTodosVehiculos, getPerfilUsuario,editarPerfilUsuario };
+module.exports = { getUsuarios, cambiarRol, getMiPerfil, actualizarPerfil, getTodosVehiculos, getPerfilUsuario, editarPerfilUsuario };

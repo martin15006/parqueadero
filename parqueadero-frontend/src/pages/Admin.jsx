@@ -17,6 +17,8 @@ export default function Admin() {
     const [filtros, setFiltros] = useState({ placa: '', tipo: '', fecha_inicio: '', fecha_fin: '' });
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const [buscarUsuario, setBuscarUsuario] = useState('');
+    const [buscarVehiculo, setBuscarVehiculo] = useState('');
 
     useEffect(() => {
         const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
@@ -30,10 +32,8 @@ export default function Admin() {
     const cargarDatos = async () => {
         try {
             const resEstadisticas = await api.get('/registros/estadisticas');
-            const [resUsuarios, resVehiculos] = await Promise.all([
-                api.get('/usuarios'),
-                api.get('/usuarios/vehiculos'),
-            ]);
+            const resUsuarios = await api.get(`/usuarios${buscarUsuario ? `?buscar=${buscarUsuario}` : ''}`);
+            const resVehiculos = await api.get(`/usuarios/vehiculos${buscarVehiculo ? `?buscar={buscarVehiculo}` : ''}`);
             setUsuarios(resUsuarios.data);
             setVehiculos(resVehiculos.data);
             setEstadisticas(resEstadisticas.data);
@@ -42,6 +42,7 @@ export default function Admin() {
             setError('Error al cargar los datos');
         }
     };
+
     const totalCeladores = usuarios?.filter(u => u.role === 'celador').length || 0;
 
     const datosGrafica = (estadisticas?.porDia ?? []).map(item => ({
@@ -57,6 +58,7 @@ export default function Admin() {
             if (filtros.tipo) params.append('tipo', filtros.tipo);
             if (filtros.fecha_inicio) params.append('fecha_inicio', filtros.fecha_inicio);
             if (filtros.fecha_fin) params.append('fecha_fin', filtros.fecha_fin);
+            if (filtros.celador) params.append('celador', filtros.celador);
 
             const res = await api.get(`/registros?${params.toString()}`);
             setHistorial(res.data);
@@ -246,7 +248,25 @@ export default function Admin() {
 
                 {/* Usuarios */}
                 <div className="card">
-                    <h3 style={{ marginBottom: '16px' }}>Usuarios registrados</h3>
+                    <div className="top-bar">
+                        <h3>Usuarios registrados</h3>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <input
+                                placeholder="Buscar por nombre, cedula o email"
+                                value={buscarUsuario}
+                                onChange={e => setBuscarUsuario(e.target.value)}
+                                style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '8px', minWidth: '250px' }}
+                            />
+
+                            <button className="btn btn-primary" onClick={cargarDatos} style={{ width: 'auto' }}>
+                                Buscar
+                            </button>
+                            <button className="btn btn-warning" onClick={() => {
+                                setBuscarUsuario(''); setTimeout(cargarDatos, 100);
+                            }} style={{ width: 'auto' }}>Limpiar</button>
+                        </div>
+                    </div>
+                    {/* tabla usuarios  */}
                     <div className="tabla-contenedor">
 
                         <table className="tabla">
@@ -307,6 +327,13 @@ export default function Admin() {
                             value={filtros.placa}
                             onChange={e => setFiltros({ ...filtros, placa: e.target.value })}
                             style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '8px' }} />
+
+                        <input
+                            placeholder="Buscar por celador"
+                            value={filtros.celador || ''}
+                            onChange={e => setFiltros({ ...filtros, celador: e.target.value })}
+                            style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '8px' }}
+                        />
 
                         <select
                             value={filtros.tipo}
@@ -380,10 +407,24 @@ export default function Admin() {
                 </div>
 
 
-
-                {/* Vehículos */}
                 <div className="card">
-                    <h3 style={{ marginBottom: '16px' }}>Todos los vehículos</h3>
+                    <div className="top-bar">
+                        <h3>Todos los vehículos</h3>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <input placeholder="Buscar por placa, marca o propietario"
+                                value={buscarVehiculo}
+                                onChange={e => setBuscarVehiculo(e.target.value)}
+                                style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '8px', minWidth: '250px' }}
+                            />
+                            <button className="btn btn-primary" onClick={cargarDatos} style={{ width: 'auto' }}>
+                                Buscar
+                            </button>
+                            <button className="btn btn-warning" onClick={() => { setBuscarVehiculo(''); setTimeout(cargarDatos, 100); }} style={{ width: 'auto' }}>
+                                Limpiar
+                            </button>
+                        </div>
+                    </div>
+                    {/* Tabla Vehículos */}
                     <div className="tabla-contenedor">
                         <table className="tabla">
                             <thead>

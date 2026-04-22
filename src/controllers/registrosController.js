@@ -75,7 +75,7 @@ const registrarMovimiento = async (req, res) => {
 
 const verHistorial = async (req, res) => {
     try {
-        const { placa, tipo, fecha_inicio, fecha_fin } = req.query;
+        const { placa, tipo, fecha_inicio, fecha_fin, celador } = req.query;
 
         let condiciones = [];
         let valores = [];
@@ -83,6 +83,11 @@ const verHistorial = async (req, res) => {
         if (placa) {
             condiciones.push('(v.placa LIKE ? OR r.placa_referencia LIKE ?)');
             valores.push(`%${placa}%`, `%${placa}%`);
+        }
+
+        if (celador) {
+            condiciones.push('c.nombre LIKE ?');
+            valores.push(`%${celador}%`);
         }
 
         if (tipo) {
