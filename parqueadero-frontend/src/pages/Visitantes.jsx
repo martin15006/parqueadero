@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import api from '../api/axios';
+import * as XLSX from 'xlsx';
 import ExcelJS from "exceljs";
 
 export default function Visitantes() {
@@ -98,18 +99,61 @@ export default function Visitantes() {
 
 
                 for (const fila of filas) {
+                    const nombreFila = String(fila.nombre || fila.Nombre || '').trim();
+                    const apellidoFila = String(fila.apellido || fila.Apellido || '').trim();
+                    const documentoFila = String(fila.documento || fila.Documento || '').trim();
+                    const tipo_vehiculoFila = String(fila.tipo_vehiculo || fila.Tipo_vehiculo || '').trim();
+                    const placaFila = String(fila.placa || fila.Placa || '').trim();
+                    const marcaFila = String(fila.marca || fila.Marca || '').trim();
+                    const colorFila = String(fila.color || fila.Color || '').trim();
+
+                    if (!nombreFila) {
+                        omitidos++;
+                        continue;
+                    }
+
+                    if (!apellidoFila) {
+                        omitidos++;
+                        continue;
+                    }
+
+                    if (!documentoFila) {
+                        omitidos++;
+                        continue;
+                    }
+
+                    if (!placaFila) {
+                        omitidos++;
+                        continue;
+                    }
+
+                    if (!marcaFila) {
+                        omitidos++;
+                        continue;
+                    }
+
+                    if (!colorFila) {
+                        omitidos++;
+                        continue;
+                    }
+
+                    if (!tipo_vehiculoFila) {
+                        omitidos++;
+                        continue;
+                    }
+
                     try {
                         await api.post('/visitantes', {
-                            nombre: String(fila.nombre || fila.Nombre || '').trim(),
-                            apellido: (fila.apellido || fila.Apellido || '').trim(),
-                            documento: String(fila.documento || fila.Documento || '').trim(),
+                            nombre: nombreFila,
+                            apellido: apellidoFila,
+                            documento: documentoFila,
                             telefono: String(fila.telefono || fila.Telefono || '').trim(),
                             correo: String(fila.correo || fila.Correo || '').trim(),
-                            tipo_vehiculo: String(fila.tipo_vehiculo || fila.Tipo_vehiculo || 'carro').trim(),
-                            placa: String(fila.placa || fila.Placa || '').trim(),
-                            marca: String(fila.marca || fila.Marca || '').trim(),
+                            tipo_vehiculo: tipo_vehiculoFila,
+                            placa: placaFila,
+                            marca: marcaFila,
                             modelo: String(fila.modelo || fila.Modelo || '').trim(),
-                            color: String(fila.color || fila.Color || '').trim(),
+                            color: colorFila,
                             descripcion: String(fila.descripcion || fila.Descripcion || '').trim(),
                         });
                         registrados++;

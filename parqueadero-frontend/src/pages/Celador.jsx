@@ -42,19 +42,24 @@ export default function Celador() {
 
                     try {
                         const datos = JSON.parse(textoQR);
+                        if (datos.tipo === 'visitante') {
 
-                        // si tiene placa buscar por la placa 
-                        if (datos.placa && datos.placa.trim() !== '') {
-                            const resV = await api.get(`/visitantes/buscar/${datos.placa.toUpperCase().trim()}`);
-                            setVehiculo({ ...resV.data, esVisitante: 'true' });
-                            setExito('Visitante encontrado-confirma la entrada');
-                        } else {
-                            // sin placa se busca por el nombre 
-                            const resV = await api.get(`/visitantes/buscar-nombre/${encodeURIComponent(datos.nombre)}`);
-                            setVehiculo({ ...resV.data, esVisitante: true });
+                            // si tiene placa buscar por la placa 
+                            if (datos.placa && datos.placa.trim() !== '') {
+                                const resV = await api.get(`/visitantes/buscar/${datos.placa.toUpperCase().trim()}`);
+                                setVehiculo({ ...resV.data, esVisitante: true });
+                                setExito('Visitante encontrado-confirma la entrada');
+                            } else {
+                                // sin placa se busca por el nombre 
+                                const resV = await api.get(`/visitantes/buscar-nombre/${encodeURIComponent(datos.nombre)}`);
+                                setVehiculo({ ...resV.data, esVisitante: true });
+                            }
                             setExito('Visitante encontrado - confirma la entrada');
+                        }else{
+                            setPlaca(datos.placa);
+                            buscarPorPlaca(datos.placa);
                         }
-                    } catch (err){
+                    } catch (err) {
                         setError(err.response?.data?.mensaje || 'Visitante no encontrado');
                     }
                 },
