@@ -248,24 +248,27 @@ export default function Admin() {
 
                 {/* Usuarios */}
                 <div className="card">
-                    <div className="top-bar">
-                        <h3>Usuarios registrados</h3>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <input
-                                placeholder="Buscar por nombre, cedula o email"
-                                value={buscarUsuario}
-                                onChange={e => setBuscarUsuario(e.target.value)}
-                                style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '8px', minWidth: '250px' }}
-                            />
 
-                            <button className="btn btn-primary" onClick={cargarDatos} style={{ width: 'auto' }}>
-                                Buscar
-                            </button>
-                            <button className="btn btn-warning" onClick={() => {
-                                setBuscarUsuario(''); setTimeout(cargarDatos, 100);
-                            }} style={{ width: 'auto' }}>Limpiar</button>
+                
+                        <h3>Usuarios registrados</h3>
+                        <div className="top-bar">
+                            <div style={{ display: 'flex', gap: '10px',flexWrap: 'wrap' }}>
+                                <input
+                                    placeholder="Buscar por nombre, cedula o email"
+                                    value={buscarUsuario}
+                                    onChange={e => setBuscarUsuario(e.target.value)}
+                                    style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '8px', minWidth: '250px' }}
+                                />
+
+                                <button className="btn btn-primary" onClick={cargarDatos} style={{ width: 'auto' }}>
+                                    Buscar
+                                </button>
+                                <button className="btn btn-warning" onClick={() => {
+                                    setBuscarUsuario(''); setTimeout(cargarDatos, 100);
+                                }} style={{ width: 'auto' }}>Limpiar</button>
+                            </div>
                         </div>
-                    </div>
+                    
                     {/* tabla usuarios  */}
                     <div className="tabla-contenedor">
 

@@ -239,7 +239,7 @@ body {
 }
 
 /* General: Ajustes globales para mejorar la visualización en pantallas pequeñas */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
 
   /* Hacer que las cards se apilen en una sola columna en dispositivos pequeños */
   .pagina {

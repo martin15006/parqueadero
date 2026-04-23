@@ -4,6 +4,12 @@ const QRcode = require('qrcode');
 const registrarVisitantes = async (req, res) => {
     try {
         const { nombre, apellido, documento, telefono, correo, tipo_vehiculo, placa, marca, modelo, color, descripcion } = req.body;
+
+        const tiposValidos = ['carro','moto', 'otro'];
+        const tipoFinal = tiposValidos.includes(tipo_vehiculo?.toLowerCase())
+        ? tipo_vehiculo.toLowerCase()
+        : 'carro';
+
         const placaFormateada = placa ? placa.toUpperCase().trim() : null;
         const admin_id = req.usuario.id;
 
@@ -58,7 +64,7 @@ const registrarVisitantes = async (req, res) => {
             tipo_vehiculo, placa, marca, modelo, color, descripcion, 
             registrado_por, estado, qr_temporal, fecha_entrada)
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?, 'pendiente', ?, NOW())`,
-            [nombre, apellido, documento, telefono, correo, tipo_vehiculo, placaFormateada, marca, modelo, color, descripcion, admin_id, qrImagen]
+            [nombre, apellido, documento, telefono, correo, tipoFinal, placaFormateada, marca, modelo, color, descripcion, admin_id, qrImagen]
         );
 
         res.status(201).json({
@@ -107,13 +113,21 @@ const registrarEntradaVisitante = async (req, res) => {
             return res.status(400).json({ mensaje: 'Este QR no es de visitante' });
         }
 
-        // Buscar visitante por placa y nombre 
-        const [visitantes] = await db.query(
-            `SELECT * FROM visitantes 
-            WHERE placa = ? AND estado = 'pendiente'
-            ORDER BY fecha_entrada DESC LIMIT 1`,
-            [datos.placa.toUpperCase().trim()]
-        );
+        // Buscar visitante por placa si exite, osino por nombre
+        let visitantes;
+        if (datos.placa && datos.placa.trim() !== '') {
+            [visitantes] = await db.query(
+                `SELECT * FROM visitantes 
+                WHERE placa = ? AND estado = 'pendiente'
+                ORDER BY fecha_entrada DESC LIMIT 1`,
+                [datos.placa.toUpperCase().trim()]
+            );
+        } else {
+            [visitante] = await db.query(
+                `SELECT * FROM visitantes WHERE nombre = ? AND estado = 'pendiente' ORDER BY fecha_entrada DESC LIMIT 1`,
+                [datos.nombre]
+            );
+        }
 
         if (visitantes.length === 0) {
             return res.status(404).json({ mensaje: 'Visitante no encontrado o QR ya usado' });
@@ -238,4 +252,21 @@ const registrarEntradaById = async (req, res) => {
     }
 };
 
-module.exports = { registrarVisitantes, getVisitantes, registrarEntradaVisitante, registrarSalidaVisitante, buscarVisitantePorPlaca, registrarEntradaById };
+const buscarVisitantePorNombre = async (req, res) => {
+    try {
+        const { nombre } = req.params;
+        const [visitantes] = await db.query(
+            `SELECT * FROM visitantes WHERE nombre = ? AND estado IN ('pendiente', 'adentro') ORDER BY fecha_entrada DESC LIMIT 1`,
+            [decodeURIComponent(nombre)]
+        );
+        if (visitantes.length === 0) {
+            return res.status(404).json({ mensaje: 'Visitante no encontrado' });
+        }
+        res.json({ ...visitantes[0], esVisitante: true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error en el servidor' });
+    }
+};
+
+module.exports = { registrarVisitantes, getVisitantes, registrarEntradaVisitante, registrarSalidaVisitante, buscarVisitantePorPlaca, registrarEntradaById, buscarVisitantePorNombre };

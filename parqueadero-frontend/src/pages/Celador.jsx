@@ -43,22 +43,19 @@ export default function Celador() {
                     try {
                         const datos = JSON.parse(textoQR);
 
-                        if (datos.tipo === 'visitante') {
-                            // Es un QR de visitante 
-                            try {
-                                const res = await api.post('/visitantes/entrada-qr', { qr_data: textoQR });
-                                setVehiculo({ ...res.data.visitante, esVisitante: true });
-                                setExito('Visitante identificado- Confirma la entrada');
-                            } catch (err) {
-                                setError(err.response?.data?.mensaje || 'Error al procesar QR de visitante');
-                            }
+                        // si tiene placa buscar por la placa 
+                        if (datos.placa && datos.placa.trim() !== '') {
+                            const resV = await api.get(`/visitantes/buscar/${datos.placa.toUpperCase().trim()}`);
+                            setVehiculo({ ...resV.data, esVisitante: 'true' });
+                            setExito('Visitante encontrado-confirma la entrada');
                         } else {
-                            // Es un QR de un usuario normal 
-                            setPlaca(datos.placa);
-                            buscarPorPlaca(datos.placa);
+                            // sin placa se busca por el nombre 
+                            const resV = await api.get(`/visitantes/buscar-nombre/${encodeURIComponent(datos.nombre)}`);
+                            setVehiculo({ ...resV.data, esVisitante: true });
+                            setExito('Visitante encontrado - confirma la entrada');
                         }
-                    } catch {
-                        setError('QR invalido');
+                    } catch (err){
+                        setError(err.response?.data?.mensaje || 'Visitante no encontrado');
                     }
                 },
                 () => { }
