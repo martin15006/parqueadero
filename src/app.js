@@ -14,12 +14,14 @@ const vehiculosRoutes = require('./routes/vehiculosRoutes');
 const registrosRoutes = require('./routes/registrosRoutes');
 const usuariosRoutes = require('./routes/usuariosRoutes');
 const visitantesRoutes = require('./routes/visitantesRoutes');
+const parqueaderoRoutes = require('./routes/parqueaderoRoutes');
 
 app.use('/auth', authRoutes);
 app.use('/vehiculos', vehiculosRoutes);
 app.use('/registros', registrosRoutes);
 app.use('/usuarios', usuariosRoutes);
 app.use('/visitantes', visitantesRoutes);
+app.use('/parqueadero', parqueaderoRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {

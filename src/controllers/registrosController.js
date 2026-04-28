@@ -7,6 +7,15 @@ const registrarMovimiento = async (req, res) => {
         const { placa, tipo } = req.body;
         const celador_id = req.usuario.id;
 
+        // verificar si el parqueadero esta activo 
+        const [config] = await db.query(`SELECT * FROM configuracion_parqueadero WHERE id = 1`);
+        if (config.length > 0 && !config[0].parqueadero_activo) {
+            return res.status(400).json({
+                mensaje: `El parqueadero esta desabilitado. ${config[0].motivo_cierre ? 'Motivo: ' + config[0].motivo_cierre : ''}`,
+                parqueadero_desabilitado: true
+            });
+        }
+
         // 1. Buscar el vehículo por placa
         const [vehiculos] = await db.query(
             `SELECT v.*, u.nombre, u.email 
@@ -42,6 +51,37 @@ const registrarMovimiento = async (req, res) => {
             if (ultimoTipo === 'salida' && tipo === 'salida') {
                 return res.status(400).json({
                     mensaje: 'Este vehículo ya registró salida. Debe registrar entrada primero.'
+                });
+            }
+        }
+
+        // verificar capacidad si es entrada 
+        if (tipo === 'entrada') {
+            const tipoVehiculo = vehiculo.tipo;
+            const campoCapacidad = tipoVehiculo === 'carro' ? 'espacios_carros' : tipoVehiculo === 'moto' ? 'espacios_motos' : 'espacios_otros';
+
+            const [ocupadosActual] = await db.query(`
+                SELECT * FROM as total FROM(
+                SELCET vehiculo_id, tipo,
+                ROW_NUMBER() OVER (PARTITION BY vehiculo_id ORDER BY fecha DESC) as rn 
+                FROM registros WHERE vehiculo_id IS NOT NULL
+                )t 
+                JOIN vehiculos v ON t.vehiculo_id = v.id
+                WHERE t.rn = 1 AND t.tipo = 'entrada' AND v.tipo = ?
+                `, [tipoVehiculo]);
+
+            const [visitantesOcupados] = await db.query(
+                `SELECT COUNT(*) as total FROM visitantes WHERE estado = 'adentro' AND tipo_vehiculo = ?`,
+                [tipoVehiculo]
+            );
+
+            const totalOcupado = Number(ocupadosActual[0].total) + Number(visitantesOcupados[0].total);
+            const capacidadMaxima = config[0][campoCapacidad];
+
+            if(totalOcupado >= capacidadMaxima){ 
+                return res.status(400).json({
+                    mensaje: `No hay espacios disponibles para ${tipoVehiculo}s. El parqueadero esta lleno para este tipo de vehiculo.`,
+                    tipo_lleno: tipoVehiculo
                 });
             }
         }

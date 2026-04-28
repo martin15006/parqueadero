@@ -57,6 +57,7 @@ export default function Navbar() {
                         style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1' }}>
                         📋 Mi Historial
                     </Link>
+                    <Link typeof='/Parqueadero'>🅿️ Parqueadero</Link>
                     {usuario.role === 'admin' && (
                         <Link to='/visitantes' onClick={() => setMenuAbierto(false)}
                             style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1' }}>
