@@ -9,7 +9,7 @@ export default function Navbar() {
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('usuario');
-        navigate('/Landing');
+        navigate('/landing');
     };
     return (
         <nav className='navbar' style={{ flexDirection: 'column', padding: '0' }}>
@@ -32,40 +32,43 @@ export default function Navbar() {
 
             {/* menu desplegable */}
             {menuAbierto && (
-                <div style={{ width: '100%', backgroud: 'rgba(0,0,0,0.3)', padding: '8px 0', borderTop: '1px solid rgba(255,255,255,02' }}>
+                <div style={{ width: '100%', backgroud: 'rgba(0,0,0,0.3)', padding: '8px 0', borderTop: '1px solid rgba(255,255,255,02)' }}>
                     {usuario.role === 'admin' && (
                         <Link to='/admin' onClick={() => setMenuAbierto(false)}
-                            style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1' }}>
+                            style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                             ⚙️ Panel Administrador
                         </Link>
                     )}
                     {usuario.role === 'celador' && (
                         <Link to='/celador' onClick={() => setMenuAbierto(false)}
-                            style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1' }}>
+                            style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                             🔍 Panel Celador
                         </Link>
                     )}
                     <Link to='/dashboard' onClick={() => setMenuAbierto(false)}
-                        style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1' }}>
+                        style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                         🏠 Inicio
                     </Link>
                     <Link to='/perfil' onClick={() => setMenuAbierto(false)}
-                        style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1' }}>
+                        style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                         👤 Perfil
                     </Link>
                     <Link to='/mi-historial' onClick={() => setMenuAbierto(false)}
-                        style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1' }}>
+                        style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                         📋 Mi Historial
                     </Link>
-                    <Link typeof='/Parqueadero'>🅿️ Parqueadero</Link>
+                    <Link to='/parqueadero' onClick={() => setMenuAbierto(false)}
+                        style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        🅿️ Parqueadero
+                    </Link>
                     {usuario.role === 'admin' && (
                         <Link to='/visitantes' onClick={() => setMenuAbierto(false)}
-                            style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1' }}>
+                            style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                             🚶 Visitantes
                         </Link>
                     )}
                     <button onClick={logout}
-                    style={{display: 'block', width:'100%', textAlign:'left',padding:'12px 20px', background:'#e74c3c', color:'white', border:'none', cursor:'pointer', fontSize:'1rem'}}>
+                        style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 20px', background: '#e74c3c', color: 'white', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>
                         Cerrar Sesion
                     </button>
                 </div>

@@ -10,7 +10,7 @@ const getEstadoParqueadero = async (req, res) => {
         // contar los vehiculos que estan adentro por tipo 
         const [adentroRegistrados] = await db.query(`
             SELECT v.tipo, COUNT(*) as total
-            FROM registros registros
+            FROM registros r
             JOIN vehiculos v ON r.vehiculo_id = v.id
             WHERE r.tipo = 'entrada'
             AND r.vehiculo_id IN (
@@ -18,7 +18,7 @@ const getEstadoParqueadero = async (req, res) => {
                 SELECT vehiculo_id, tipo,
                 ROW_NUMBER() OVER(PARTITION BY vehiculo_id ORDER BY fecha DESC) as rn 
                 FROM registros WHERE vehiculo_id IS NOT NULL
-            )t WHETE rn = 1 AND tipo = 'entrada'
+            )t WHERE rn = 1 AND tipo = 'entrada'
             )
             GROUP BY v.tipo
             `);
@@ -27,7 +27,7 @@ const getEstadoParqueadero = async (req, res) => {
                 SELECT tipo_vehiculo as tipo, COUNT(*) as total
                 FROM visitantes
                 WHERE estado = 'adentro'
-                GROUP BY tipo_vehuculo
+                GROUP BY tipo_vehiculo
                 `);
 
         // conteos 
@@ -61,17 +61,37 @@ const getEstadoParqueadero = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        res.stastu(500).json({ mensaje: 'Error en el servidor' });
+        res.status(500).json({ mensaje: 'Error en el servidor' });
     }
 };
 
 const actualizarConfiguracion = async (req, res) => {
     try {
         const { espacios_carros, espacios_motos, espacios_otros } = req.body;
-        await db.query(
-            `UPDATE configuracion_parqueadero SET espacios_carros = ?, espacios_motos = ?, espacios_otros = ? WHERE id = 1`,
-            [espacios_carros, espacios_motos, espacios_otros]
-        );
+
+        const updates = [];
+        const valores = [];
+
+        if (espacios_carros !== undefined && espacios_carros !== '') {
+            updates.push('espacios_carros = ?');
+            valores.push(parseInt(espacios_carros));
+        }
+
+        if (espacios_motos !== undefined && espacios_motos !== '') {
+            updates.push('espacios_motos = ?');
+            valores.push(parseInt(espacios_motos));
+        }
+
+        if (espacios_otros !== undefined && espacios_otros !== '') {
+            updates.push('espacios_otros = ?');
+            valores.push(parseInt(espacios_otros));
+        }
+
+        if (updates.length === 0) {
+            return res.status(400).json({ mensaje: 'No hay cambios para guardar' });
+        }
+        valores.push(1);
+        await db.query(`UPDATE configuracion_parqueadero SET ${updates.join(', ')} WHERE id = ?`, valores);
         res.json({ mensaje: 'Configuracion actualizada' });
     } catch (error) {
         console.error(error);
@@ -79,7 +99,7 @@ const actualizarConfiguracion = async (req, res) => {
     }
 };
 
-const toogleParqueadero = async (req, res) => {
+const toggleParqueadero = async (req, res) => {
     try {
         const { activo, motivo_cierre } = req.body;
         await db.query(
@@ -93,4 +113,4 @@ const toogleParqueadero = async (req, res) => {
     }
 };
 
-module.exports = { getEstadoParqueadero, actualizarConfiguracion, toogleParqueadero };
+module.exports = { getEstadoParqueadero, actualizarConfiguracion, toggleParqueadero };
