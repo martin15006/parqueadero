@@ -249,26 +249,26 @@ export default function Admin() {
                 {/* Usuarios */}
                 <div className="card">
 
-                
-                        <h3>Usuarios registrados</h3>
-                        <div className="top-bar">
-                            <div style={{ display: 'flex', gap: '10px',flexWrap: 'wrap' }}>
-                                <input
-                                    placeholder="Buscar por nombre, cedula o email"
-                                    value={buscarUsuario}
-                                    onChange={e => setBuscarUsuario(e.target.value)}
-                                    style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '8px', minWidth: '250px' }}
-                                />
 
-                                <button className="btn btn-primary" onClick={cargarDatos} style={{ width: 'auto' }}>
-                                    Buscar
-                                </button>
-                                <button className="btn btn-warning" onClick={() => {
-                                    setBuscarUsuario(''); setTimeout(cargarDatos, 100);
-                                }} style={{ width: 'auto' }}>Limpiar</button>
-                            </div>
+                    <h3>Usuarios registrados</h3>
+                    <div className="top-bar">
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            <input
+                                placeholder="Buscar por nombre, cedula o email"
+                                value={buscarUsuario}
+                                onChange={e => setBuscarUsuario(e.target.value)}
+                                style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '8px', minWidth: '250px' }}
+                            />
+
+                            <button className="btn btn-primary" onClick={cargarDatos} style={{ width: 'auto' }}>
+                                Buscar
+                            </button>
+                            <button className="btn btn-warning" onClick={() => {
+                                setBuscarUsuario(''); setTimeout(cargarDatos, 100);
+                            }} style={{ width: 'auto' }}>Limpiar</button>
                         </div>
-                    
+                    </div>
+
                     {/* tabla usuarios  */}
                     <div className="tabla-contenedor">
 
@@ -320,6 +320,73 @@ export default function Admin() {
                         </table>
                     </div>
                 </div>
+                
+                <div className="card">
+                    <div className="top-bar">
+                        <h3>Todos los vehículos</h3>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <input placeholder="Buscar por placa, marca o propietario"
+                                value={buscarVehiculo}
+                                onChange={e => setBuscarVehiculo(e.target.value)}
+                                style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '8px', minWidth: '250px' }}
+                            />
+                            <button className="btn btn-primary" onClick={cargarDatos} style={{ width: 'auto' }}>
+                                Buscar
+                            </button>
+                            <button className="btn btn-warning" onClick={() => { setBuscarVehiculo(''); setTimeout(cargarDatos, 100); }} style={{ width: 'auto' }}>
+                                Limpiar
+                            </button>
+                        </div>
+                    </div>
+                    {/* Tabla Vehículos */}
+                    <div className="tabla-contenedor">
+                        <table className="tabla">
+                            <thead>
+                                <tr>
+                                    <th>Placa</th>
+                                    <th>Tipo</th>
+                                    <th>Marca</th>
+                                    <th>Modelo</th>
+                                    <th>Color</th>
+                                    <th>Propietario</th>
+                                    <th>Email</th>
+                                    <th>Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {vehiculos.map(v => (
+                                    <tr key={v.id}>
+                                        <td>{v.placa?.trim()}</td>
+                                        <td>{v.tipo?.trim()}</td>
+                                        <td>{v.marca?.trim()}</td>
+                                        <td>{v.modelo?.trim()}</td>
+                                        <td>{v.color?.trim()}</td>
+                                        <td>{v.nombre?.trim()}</td>
+                                        <td>{v.email?.trim()}</td>
+                                        <td>
+                                            <button
+                                                className="btn btn-danger btn-sm"
+                                                onClick={async () => {
+                                                    if (window.confirm(`¿Eliminar vehículo ${v.placa}?`)) {
+                                                        try {
+                                                            await api.delete(`/vehiculos/${v.id}`);
+                                                            cargarDatos();
+                                                        } catch {
+                                                            alert('Error al eliminar');
+                                                        }
+                                                    }
+                                                }}
+                                            >
+                                                Eliminar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div className="card">
                     <h3 style={{ marginBottom: '16px' }}>Historial de entradas y salidas</h3>
 
@@ -410,71 +477,7 @@ export default function Admin() {
                 </div>
 
 
-                <div className="card">
-                    <div className="top-bar">
-                        <h3>Todos los vehículos</h3>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <input placeholder="Buscar por placa, marca o propietario"
-                                value={buscarVehiculo}
-                                onChange={e => setBuscarVehiculo(e.target.value)}
-                                style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '8px', minWidth: '250px' }}
-                            />
-                            <button className="btn btn-primary" onClick={cargarDatos} style={{ width: 'auto' }}>
-                                Buscar
-                            </button>
-                            <button className="btn btn-warning" onClick={() => { setBuscarVehiculo(''); setTimeout(cargarDatos, 100); }} style={{ width: 'auto' }}>
-                                Limpiar
-                            </button>
-                        </div>
-                    </div>
-                    {/* Tabla Vehículos */}
-                    <div className="tabla-contenedor">
-                        <table className="tabla">
-                            <thead>
-                                <tr>
-                                    <th>Placa</th>
-                                    <th>Tipo</th>
-                                    <th>Marca</th>
-                                    <th>Modelo</th>
-                                    <th>Color</th>
-                                    <th>Propietario</th>
-                                    <th>Email</th>
-                                    <th>Eliminar</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {vehiculos.map(v => (
-                                    <tr key={v.id}>
-                                        <td>{v.placa?.trim()}</td>
-                                        <td>{v.tipo?.trim()}</td>
-                                        <td>{v.marca?.trim()}</td>
-                                        <td>{v.modelo?.trim()}</td>
-                                        <td>{v.color?.trim()}</td>
-                                        <td>{v.nombre?.trim()}</td>
-                                        <td>{v.email?.trim()}</td>
-                                        <td>
-                                            <button
-                                                className="btn btn-danger btn-sm"
-                                                onClick={async () => {
-                                                    if (window.confirm(`¿Eliminar vehículo ${v.placa}?`)) {
-                                                        try {
-                                                            await api.delete(`/vehiculos/${v.id}`);
-                                                            cargarDatos();
-                                                        } catch {
-                                                            alert('Error al eliminar');
-                                                        }
-                                                    }
-                                                }}
-                                            >
-                                                Eliminar
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+
             </div>
         </>
 

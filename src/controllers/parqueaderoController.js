@@ -10,18 +10,17 @@ const getEstadoParqueadero = async (req, res) => {
         // contar los vehiculos que estan adentro por tipo 
         const [adentroRegistrados] = await db.query(`
             SELECT v.tipo, COUNT(*) as total
-            FROM registros r
-            JOIN vehiculos v ON r.vehiculo_id = v.id
-            WHERE r.tipo = 'entrada'
-            AND r.vehiculo_id IN (
-                SELECT vehiculo_id FROM(
+            FROM (
                 SELECT vehiculo_id, tipo,
-                ROW_NUMBER() OVER(PARTITION BY vehiculo_id ORDER BY fecha DESC) as rn 
-                FROM registros WHERE vehiculo_id IS NOT NULL
-            )t WHERE rn = 1 AND tipo = 'entrada'
-            )
+                ROW_NUMBER() OVER(PARTITION BY vehiculo_id ORDER BY fecha DESC) as rn
+                FROM registros 
+                WHERE vehiculo_id IS NOT NULL
+            ) t
+            JOIN vehiculos v ON t.vehiculo_id = v.id
+            WHERE t.rn = 1 
+            AND t.tipo = 'entrada'
             GROUP BY v.tipo
-            `);
+        `);
 
         const [adentroVisitantes] = await db.query(`
                 SELECT tipo_vehiculo as tipo, COUNT(*) as total
@@ -33,13 +32,31 @@ const getEstadoParqueadero = async (req, res) => {
         // conteos 
         const ocupados = { carro: 0, moto: 0, otro: 0 };
 
+        const mapTipos = {
+            carro: 'carro',
+            carros: 'carro',
+            moto: 'moto',
+            motos: 'moto',
+            otro: 'otro',
+            otros: 'otro'
+        };
+
         adentroRegistrados.forEach(r => {
-            if (ocupados[r.tipo] !== undefined) ocupados[r.tipo] += Number(r.total);
+            const tipoBD = (r.tipo || '').toLowerCase();
+            const tipo = mapTipos[tipoBD];
+
+            if (ocupados[tipo] !== undefined) {
+                ocupados[tipo] += Number(r.total);
+            }
         });
 
         adentroVisitantes.forEach(r => {
-            const tipo = r.tipo === 'otro' ? 'otro' : r.tipo;
-            if (ocupados[tipo] !== undefined) ocupados[tipo] += Number(r.total);
+            const tipoBD = (r.tipo || '').toLowerCase();
+            const tipo = mapTipos[tipoBD];
+
+            if (ocupados[tipo] !== undefined) {
+                ocupados[tipo] += Number(r.total);
+            }
         });
 
         const disponibles = {
@@ -48,13 +65,13 @@ const getEstadoParqueadero = async (req, res) => {
             otro: Math.max(0, cfg.espacios_otros - ocupados.otro),
         };
 
-        res.json({
+        res.status(200).json({
             parqueadero_activo: cfg.parqueadero_activo,
             motivo_cierre: cfg.motivo_cierre,
             capacidad: {
-                carro: cfg.espacios_carros,
-                motos: cfg.espacios_motos,
-                otros: cfg.espacios_otros,
+                carro: cfg.espacios_carros || 0,
+                moto: cfg.espacios_motos || 0,
+                otro: cfg.espacios_otros || 0,
             },
             ocupados,
             disponibles,
@@ -106,7 +123,7 @@ const toggleParqueadero = async (req, res) => {
             `UPDATE configuracion_parqueadero SET parqueadero_activo = ?, motivo_cierre = ? WHERE id = 1`,
             [activo, activo ? null : motivo_cierre]
         );
-        res.json({ mensaje: activo ? 'Parqueadero habilitado' : 'Parqueadero desabilitado' });
+        res.json({ mensaje: activo ? 'Parqueadero habilitado' : 'Parqueadero deshabilitado' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ mensaje: 'Error en el servidor' });

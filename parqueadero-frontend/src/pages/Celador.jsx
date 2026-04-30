@@ -12,7 +12,7 @@ export default function Celador() {
     const [escaneando, setEscaneando] = useState(false);
     const html5QrRef = useRef(null);
     const navigate = useNavigate();
-    const [modalLleno, setModalLleno] = useState({ visible: false, mensaje: '' });
+    const [modalLleno, setModalLleno] = useState({ visible: false, mensaje: '', tipo: '' });
 
     useEffect(() => {
         const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
@@ -109,11 +109,11 @@ export default function Celador() {
             setPlaca('');
         } catch (err) {
             const mensaje = err.response?.data?.mensaje || 'Error al registrar';
-            const esCierre = err.response?.data?.parqueadero_desabilitado;
+            const esCierre = err.response?.data?.parqueadero_deshabilitado;
             const esTipoLleno = err.response?.data?.tipo_lleno;
 
             if (esCierre || esTipoLleno) {
-                setModalLleno({ visible: true, mensaje });
+                setModalLleno({ visible: true, mensaje, tipo: esCierre ? 'deshabilitado' : 'lleno' });
             } else {
                 setError(mensaje);
             }
@@ -127,8 +127,14 @@ export default function Celador() {
             {modalLleno.visible && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
                     <div style={{ background: 'white', borderRadius: '16px', padding: '32px', width: '400px', maxWidth: '95vw', textAlign: 'center' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '12px' }}>⛔</div>
-                        <h3 style={{ color: '#e74c3c', marginBottom: '12px' }}>Parqueadero Lleno</h3>
+                        <div style={{ fontSize: '3rem', marginBottom: '12px' }}>
+                            {modalLleno.tipo === 'deshabilitado' ? '⛔' : '🚫'}
+                        </div>
+                        <h3 style={{ color: '#e74c3c', marginBottom: '12px' }}>
+                            {modalLleno.tipo === 'deshabilitado'
+                                ? 'Parqueadero Deshabilitado'
+                                : 'Parqueadero Lleno'}
+                        </h3>
                         <p style={{ color: '#666', marginBottom: '24px' }}>{modalLleno.mensaje}</p>
                         <button className="btn btn-primary" style={{ width: 'auto', padding: '10px 32px' }}
                             onClick={() => setModalLleno({ visible: false, mensaje: '' })}>

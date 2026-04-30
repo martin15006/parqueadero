@@ -18,7 +18,7 @@ export default function Parqueadero() {
     useEffect(() => {
         if (!localStorage.getItem('token')) { navigate('/login'); return; }
         cargarEstado();
-        const intervalo = setInterval(cargarEstado, 30000);
+        const intervalo = setInterval(cargarEstado, 4000);
         return () => clearInterval(intervalo);
     }, []);
 
@@ -28,8 +28,8 @@ export default function Parqueadero() {
             setEstado(res.data);
             setConfig({
                 espacios_carros: res.data.capacidad.carro,
-                espacios_motos: res.data.capacidad.moto,
-                espacios_otros: res.data.capacidad.otro,
+                espacios_motos: res.data.capacidad.moto ,
+                espacios_otros: res.data.capacidad.otro ,
             });
         } catch {
             setError('Error al cargar el estado del parqueadero');
@@ -96,7 +96,7 @@ export default function Parqueadero() {
             {modalCierre && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
                     <div style={{ background: 'white', borderRadius: '16px', padding: '32px', width: '440px', maxWidth: '95vw' }}>
-                        <h3 style={{ marginBottom: '16px', color: '#e74c3c' }}>🔴 Deshabilitar Parqueadero</h3>
+                        <h3 style={{ marginBottom: '16px', color: '#000' }}>🔴 Deshabilitar Parqueadero</h3>
                         <p style={{ color: '#666', marginBottom: '16px' }}>Ingresa el motivo del cierre. Esto bloqueará todas las entradas.</p>
                         <textarea
                             value={motivoCierre}
@@ -271,7 +271,7 @@ export default function Parqueadero() {
                 )}
 
                 <p style={{ textAlign: 'center', color: '#000', fontSize: '1rem', marginTop: '16px' }}>
-                    Se actualiza automáticamente cada 30 segundos
+                    Se actualiza automáticamente cada 4 segundos
                 </p>
             </div>
         </>
