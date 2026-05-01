@@ -269,4 +269,22 @@ const buscarVisitantePorNombre = async (req, res) => {
     }
 };
 
-module.exports = { registrarVisitantes, getVisitantes, registrarEntradaVisitante, registrarSalidaVisitante, buscarVisitantePorPlaca, registrarEntradaById, buscarVisitantePorNombre };
+const eliminarVisitante = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const [visitantes] = await db.query('SELECT * FROM visitantes WHERE id = ?', [id]);
+        if (visitantes.length === 0) {
+            return res.status(404).json({ mensaje: 'Visitante no encontrado' });
+        }
+
+        await db.query('DELETE FROM visitantes WHERE id = ?', [id]);
+
+        res.json({ mensaje: 'Visitante eliminado correctamente' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error en el servidor' });
+    }
+};
+
+module.exports = { registrarVisitantes, getVisitantes, registrarEntradaVisitante, registrarSalidaVisitante, buscarVisitantePorPlaca, registrarEntradaById, buscarVisitantePorNombre, eliminarVisitante };

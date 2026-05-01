@@ -4,48 +4,46 @@ export default function Landing() {
     const navigate = useNavigate();
 
     return (
-        <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #2b2ba3 0%, #3737a3 50%, #2688ff 100%)' }}>
+        <div style={{ minHeight: '100vh', position: 'relative' }}>
             {/* Navbar simple  */}
-            <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 40px' }}>
-                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1.4rem' }}>
-                    Parqueadero
+            <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 40px', background: 'linear-gradient(to bottom, rgba(10,6,8,0.9), transparent)', borderBottom: '1px solid var(--gold-dim)' }}>
+                <span style={{ color: 'var(--gold)', fontWeight: 'bold', fontSize: '1.4rem', fontFamily: 'var(--font-title)' }}>
+                    PARQUEADERO
                 </span>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                    <button onClick={() => navigate('/login')}
-                        style={{ padding: '8px 24px', borderRadius: '8px', border: '2px solid white', background: 'transparent', color: 'white', cursor: 'pointer', fontWeight: '600' }}>
+                    <button className="btn" onClick={() => navigate('/login')} style={{ clipPath: 'none', borderRadius: '4px' }}>
                         Iniciar Sesion
                     </button>
-                    <button onClick={() => navigate('/register')}
-                        style={{ padding: '8px 24px', borderRadius: '8px', border: 'none', background: '#4361ee', color: 'white', cursor: 'pointer', fontWeight: '600' }}>
+                    <button className="btn btn-primary" onClick={() => navigate('/register')} style={{ clipPath: 'none', borderRadius: '4px' }}>
                         Registrarse
                     </button>
                 </div>
             </nav>
 
             <div style={{ textAlign: 'center', padding: '80px 40px 60px' }}>
+                <div className="glyph-divider"><span>ᛟ</span></div>
                 <div style={{
                     fontSize: 'clamp(2rem,6.3vw,4rem)',
                     marginBottom: '24px',
-                    color: 'white',
+                    color: 'var(--gold)',
                     letterSpacing: '8px',
-                    wordBreak: 'break-word',
-                    textAlign: 'center'
+                    fontFamily: 'var(--font-title)',
+                    textShadow: '0 0 20px rgba(201,168,76,0.4)'
                 }}>
-                    🄿🄰🅁🅀🅄🄴🄰🄳🄴🅁🄾
+                    PARQUEADERO
                 </div>
-                <h1 style={{ color: 'white', fontSize: '3rem', fontWeight: 'bold', marginBottom: '16px', lineHeight: 1.2, padding: '1rem' }}>
-                    Sistema de Gestion <br /> de Parqueadero
+                <h1 style={{ color: 'var(--text-body)', fontSize: '3rem', fontWeight: 'bold', marginBottom: '16px', lineHeight: 1.2, padding: '1rem', fontFamily: 'var(--font-title)' }}>
+                    SISTEMA DE GESTIÓN <br /> DE PARQUEADERO
                 </h1>
-                <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1.2rem', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px' }}>
+                <div className="glyph-divider" style={{ marginBottom: '2rem' }}><span>✦</span></div>
+                <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px', fontStyle: 'italic' }}>
                     Control inteligente de entradas y salidas mediante código QR. Olvidate de los tramites en papel eso ya es cosa del pasado.
                 </p>
                 <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <button onClick={() => navigate('/register')}
-                        style={{ padding: '14px 36px', borderRadius: '10px', border: 'none', background: '#4361ee', color: 'white', cursor: 'pointer', fontWeight: '700', fontSize: '1.1rem' }}>
+                    <button className="btn btn-primary" onClick={() => navigate('/register')} style={{ padding: '14px 36px', fontSize: '1.1rem' }}>
                         Comenzar ahora
                     </button>
-                    <button onClick={() => navigate('/login')}
-                        style={{ padding: '14px 36px', borderRadius: '10px', border: '2px solid rgba(255,255,255,0.5)', background: 'transparent', color: 'white', cursor: 'pointer', fontWeight: '700', fontSize: '1.1rem' }}>
+                    <button className="btn" onClick={() => navigate('/login')} style={{ padding: '14px 36px', fontSize: '1.1rem' }}>
                         Ya tengo cuenta
                     </button>
                 </div>
@@ -60,21 +58,21 @@ export default function Landing() {
                     { icon: '📊', titulo: 'Estadisticas', desc: 'Panel administrativo con historial, graficas y reportes exportables en Excel y PDF.' },
                     { icon: '🚶', titulo: 'Visitantes', desc: 'Registros temparales para lo visitantes con QR de un solo uso generado por el administrador.' },
                 ].map((item, i) => (
-                    <div key={i} style={{ background: 'rgba(255,255,255,0.07)', borderRadius: '16px', padding: '32px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div key={i} className="card">
                         <div style={{ fontSize: '2.5rem', marginBottom: '16px' }}>{item.icon}</div>
-                        <h3 style={{ color: 'white', marginBottom: '10px', fontSize: '1.1rem' }}>{item.titulo}</h3>
-                        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.95rem', lineHeight: 1.6 }}>{item.desc}</p>
+                        <h3 style={{ color: 'var(--gold)', marginBottom: '10px', fontSize: '1.2rem', fontFamily: 'var(--font-heading)' }}>{item.titulo}</h3>
+                        <p style={{ color: 'var(--text-dim)', fontSize: '1rem', lineHeight: 1.6 }}>{item.desc}</p>
                     </div>
                 ))}
             </div>
 
             {/* footer  */}
-            <div style={{ textAlign: 'center', padding: '40px', borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: '40px' }}>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>
+            <div style={{ textAlign: 'center', padding: '40px', borderTop: '1px solid var(--gold-dim)', marginTop: '40px', background: 'var(--void)' }}>
+                <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', fontFamily: 'var(--font-body)' }}>
                     Sistema de parqueadero - Todos los derechos estan reservados
                 </p>
-                <p style={{ color: '#111', fontSize: '0.9rem' }}>
-                    Hecho por martincito
+                <p style={{ color: 'var(--gold-dim)', fontSize: '0.9rem', marginTop: '8px', fontFamily: 'var(--font-heading)' }}>
+                    HECHO POR MARTINCITO
                 </p>
             </div>
         </div>

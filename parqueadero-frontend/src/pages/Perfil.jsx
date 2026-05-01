@@ -59,75 +59,88 @@ export default function Perfil() {
 
     return (
         <>
-            <Navbar />            
-                <div className='pagina'>
-                    <h1>Mi Perfil</h1>
-                    {error && <div className='alerta alerta-error'>{error}</div>}
-                    {exito && <div className='alerta alerta-exito'>{exito}</div>}
+            <Navbar />
+            <div className='pagina'>
+                <div className="glyph-divider"><span>ᛟ</span></div>
+                <h1 style={{ textAlign: 'center', marginBottom: '2rem', textTransform: 'uppercase' }}>Mi Perfil (Sistema)</h1>
+                <div className="glyph-divider" style={{ marginBottom: '3rem' }}><span>✦</span></div>
 
-                    {/* Datos actuales */}
-                    <div className='card'>
-                        <div className='top-bar'>
-                            <h3>Mis datos</h3>
-                            <button
-                                className='btn btn-primary btn-sm'
-                                onClick={() => setEditando(!editando)}>
-                                {editando ? 'Cancelar' : 'Editar'}
-                            </button>
-                        </div>
-                        <div className='tabla-contenedor'>
-                            <table className='tabla'>
-                                <tbody>
-                                    <tr><td><strong>Nombre</strong></td><td>{perfil.nombre}</td></tr>
-                                    <tr><td><strong>Apellido</strong></td><td>{perfil.apellido || '-'}</td></tr>
-                                    <tr><td><strong>Cedula</strong></td><td>{perfil.cedula || '-'}</td></tr>
-                                    <tr><td><strong>Telefono</strong></td><td>{perfil.telefono}</td></tr>
-                                    <tr><td><strong>Email</strong></td><td>{perfil.email}</td></tr>
-                                    <tr><td><strong>Rol</strong></td><td>{perfil.role}</td></tr>
-                                    <tr><td><strong>Miembro desde</strong></td><td>{new Date(perfil.created_at).toLocaleDateString()}</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
+                {error && <div className='alerta alerta-error'>{error}</div>}
+                {exito && <div className='alerta alerta-exito'>{exito}</div>}
+
+                <div className='card'>
+                    <div className='top-bar'>
+                        <h3>Datos del usuario</h3>
+                        <button
+                            className='btn btn-primary btn-sm'
+                            onClick={() => setEditando(true)}>
+                            ⚙️ Editar Perfil
+                        </button>
                     </div>
 
-                {/* formulario de edicion  */}
+                    <div className="tabla-contenedor">
+                        <table className='tabla'>
+                            <tbody>
+                                <tr><td><strong>Nombre</strong></td><td>{perfil.nombre}</td></tr>
+                                <tr><td><strong>Apellido</strong></td><td>{perfil.apellido || '-'}</td></tr>
+                                <tr><td><strong>Cedula</strong></td><td>{perfil.cedula || '-'}</td></tr>
+                                <tr><td><strong>Telefono</strong></td><td>{perfil.telefono}</td></tr>
+                                <tr><td><strong>Email</strong></td><td>{perfil.email}</td></tr>
+                                <tr><td><strong>Rol</strong></td><td>{perfil.role}</td></tr>
+                                <tr><td><strong>Miembro desde</strong></td><td>{new Date(perfil.created_at).toLocaleDateString()}</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 {editando && (
-                    <div className='card'>
-                        <h3 style={{ marginBottom: '20px' }}>Editar perfil</h3>
-                        <form onSubmit={handleSubmit}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                                <div className='form-grupo'>
-                                    <label>Nombre</label>
-                                    <input name='nombre' value={form.nombre} onChange={handleChange} required />
-                                </div>
-                                <div className='form-grupo'>
-                                    <label>Apellido</label>
-                                    <input name='apellido' value={form.apellido} onChange={handleChange} />
-                                </div>
-                                <div className='form-grupo'>
-                                    <label>Telefono</label>
-                                    <input name='telefono' value={form.telefono} onChange={handleChange} />
-                                </div>
-                            </div>
-                            <div style={{ borderTop: '1px solid #eee', marginTop: '20px', paddingTop: '20px' }}>
-                                <h4 style={{ marginBottom: '16px', color: '#555' }}>Veridicacion y cambio de contraseña</h4>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="modal-overlay" onClick={() => setEditando(false)}>
+                        <div className="modal-rpg" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+                            <button className="modal-cerrar" onClick={() => setEditando(false)}>&times;</button>
+                            <h3 style={{ marginBottom: '20px', color: 'var(--gold)' }}>Editar Perfil Arcano</h3>
+                            <div className="glyph-divider"><span>✦</span></div>
+                            
+                            <form onSubmit={handleSubmit}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', textAlign: 'left' }}>
                                     <div className='form-grupo'>
-                                        <label>Contraseña actual<span style={{ color: 'red' }}>*</span></label>
-                                        <input name="passwordActual" type='password' value={form.passwordActual} onChange={handleChange} required />
+                                        <label>Nombre</label>
+                                        <input name='nombre' value={form.nombre} onChange={handleChange} required />
                                     </div>
-
                                     <div className='form-grupo'>
-                                        <label>Nueva contraseña<span style={{ color: '#888', fontSize: '0.85rem' }}>(opcional)</span></label>
-                                        <input name="passwordNueva" type='password' value={form.passwordNueva} onChange={handleChange} />
+                                        <label>Apellido</label>
+                                        <input name='apellido' value={form.apellido} onChange={handleChange} />
+                                    </div>
+                                    <div className='form-grupo' style={{ gridColumn: '1 / -1' }}>
+                                        <label>Teléfono</label>
+                                        <input name='telefono' value={form.telefono} onChange={handleChange} />
                                     </div>
                                 </div>
-                            </div>
+                                
+                                <div style={{ borderTop: '1px solid var(--gold-dim)', marginTop: '20px', paddingTop: '20px', textAlign: 'left' }}>
+                                    <h4 style={{ marginBottom: '16px', color: 'var(--gold-light)', fontFamily: 'var(--font-heading)' }}>Verificación y Contraseña</h4>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                        <div className='form-grupo'>
+                                            <label>Contraseña Actual</label>
+                                            <input name="passwordActual" type='password' value={form.passwordActual} onChange={handleChange} required />
+                                        </div>
 
-                            <button type='submit' className='btn btn-primary' style={{ marginTop: '16px' }}>
-                                Guardar cambios
-                            </button>
-                        </form>
+                                        <div className='form-grupo'>
+                                            <label>Nueva Contraseña</label>
+                                            <input name="passwordNueva" type='password' value={form.passwordNueva} onChange={handleChange} placeholder="(Opcional)" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '10px', marginTop: '24px' }}>
+                                    <button type='submit' className='btn btn-primary' style={{ flex: 1 }}>
+                                        Guardar Cambios
+                                    </button>
+                                    <button type='button' className='btn btn-danger' style={{ flex: 1 }} onClick={() => setEditando(false)}>
+                                        Cerrar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 )}
             </div>

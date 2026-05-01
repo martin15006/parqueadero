@@ -17,6 +17,8 @@ export default function Visitantes() {
     const [error, setError] = useState('');
     const [exito, setExito] = useState('');
     const [placaQR, setPlacaQR] = useState('');
+    const [busquedaPendientes, setBusquedaPendientes] = useState('');
+    const [busquedaAdentro, setBusquedaAdentro] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -74,8 +76,29 @@ export default function Visitantes() {
         }
     };
 
-    const adentro = visitantes.filter(v => v.estado === 'adentro');
-    const pendientes = visitantes.filter(v => v.estado === 'pendiente');
+    const eliminarVisitante = async (id, nombre) => {
+        if (!window.confirm(`¿Seguro que deseas eliminar a ${nombre} de la lista de pendientes?`)) return;
+        try {
+            await api.delete(`/visitantes/${id}`);
+            setExito('Visitante eliminado correctamente');
+            cargarVisitante();
+        } catch {
+            setError('Error al eliminar visitante');
+        }
+    };
+
+    const filtrarVisitantes = (lista, busqueda) => {
+        if (!busqueda) return lista;
+        const b = busqueda.toLowerCase();
+        return lista.filter(v => 
+            v.nombre?.toLowerCase().includes(b) || 
+            v.placa?.toLowerCase().includes(b) || 
+            v.documento?.toLowerCase().includes(b)
+        );
+    };
+
+    const pendientesFiltrados = filtrarVisitantes(visitantes.filter(v => v.estado === 'pendiente'), busquedaPendientes);
+    const adentroFiltrados = filtrarVisitantes(visitantes.filter(v => v.estado === 'adentro'), busquedaAdentro);
     const afuera = visitantes.filter(v => v.estado === 'afuera');
 
     const cargarDesdeExcel = async (e) => {
@@ -245,21 +268,32 @@ export default function Visitantes() {
                 {/* QR generado  */}
 
                 {qrGenerado && (
-                    <div className='card' style={{ textAlign: 'center' }}>
-                        <h3 style={{ marginBottom: '12px' }}>QR del visitante- {nombreQR}</h3>
-                        <p style={{ color: '#666', marginBottom: '16px' }}>
-                            Muestrale este QR al visitante para que el celador lo escanee al entrar
-                        </p>
-                        <img src={qrGenerado} alt='QR Visitante' style={{ width: '200px', height: '200px' }} />
-                        {placaQR && (
-                            <h3 style={{ margin: '12px 0 4px', color: '#1a1a2e' }}>{placaQR}</h3>
-                        )}
-                        <p style={{ color: '#888', fontSize: '0.85rem', marginBottom: '16px' }}>
-                            Este QR se invalida automaticamente cuando el visitante registre la salida.
-                        </p>
-                        <button className='btn btn-success' onClick={descargarQR} style={{ width: 'auto' }}>
-                            Descargar QR
-                        </button>
+                    <div className="modal-overlay" onClick={() => setQrGenerado('')}>
+                        <div className="modal-rpg" onClick={e => e.stopPropagation()}>
+                            <button className="modal-cerrar" onClick={() => setQrGenerado('')}>&times;</button>
+                            <h3 style={{ marginBottom: '12px', color: 'var(--gold)' }}>QR del visitante - {nombreQR}</h3>
+                            <div className="glyph-divider"><span>✦</span></div>
+                            <p style={{ color: 'var(--text-dim)', marginBottom: '16px', fontStyle: 'italic' }}>
+                                Muestrale este QR al visitante para que el celador lo escanee al entrar
+                            </p>
+                            <div style={{ background: 'white', padding: '10px', display: 'inline-block', borderRadius: '4px' }}>
+                                <img src={qrGenerado} alt='QR Visitante' style={{ width: '200px', height: '200px', display: 'block' }} />
+                            </div>
+                            {placaQR && (
+                                <h3 style={{ margin: '16px 0 4px', color: 'var(--gold)', fontFamily: 'var(--font-title)' }}>{placaQR}</h3>
+                            )}
+                            <p style={{ color: 'var(--crimson-glow)', fontSize: '0.85rem', marginBottom: '16px', fontStyle: 'italic' }}>
+                                Este QR se invalida automáticamente cuando el visitante registre la salida.
+                            </p>
+                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                                <button className='btn btn-success' onClick={descargarQR}>
+                                    📥 Descargar
+                                </button>
+                                <button className='btn btn-danger' onClick={() => setQrGenerado('')}>
+                                    Cerrar
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -267,16 +301,12 @@ export default function Visitantes() {
                     <div className='top-bar'>
                         <h3>Carga masiva desde Excel</h3>
 
-                        <a
-                            href="#"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                descargarPlantillaExcel();
-                            }}
-                            style={{ color: '#4361ee', fontSize: '0.9rem' }}
+                        <button
+                            className="btn btn-export btn-excel"
+                            onClick={descargarPlantillaExcel}
                         >
                             📥 Descargar Plantilla
-                        </a>
+                        </button>
                     </div>
 
                     <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '16px' }}>
@@ -358,50 +388,79 @@ export default function Visitantes() {
                 </div>
 
                 {/* pendientes de entrada  */}
-                {pendientes.length > 0 && (
-                    <div className='card'>
-                        <h3 style={{ marginBottom: '16px' }}>Pendiente de entrada ({pendientes.length})</h3>
-                        <table className='tabla'>
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Documento</th>
-                                    <th>Placa</th>
-                                    <th>Vehiculo</th>
-                                    <th>Registrado</th>
-                                    <th>QR</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {pendientes.map(v => (
-                                    <tr key={v.id}>
-                                        <td>{v.nombre}</td>
-                                        <td>{v.documento || '-'}</td>
-                                        <td>{v.placa || '-'} </td>
-                                        <td>{v.tipo_vehiculo} {v.marca} {v.modelo}</td>
-                                        <td>{new Date(v.fecha_entrada).toLocaleString()}</td>
-                                        <td>
-                                            <button className='btn btn-primary btn-sm'
-                                                onClick={() => {
-                                                    setQrGenerado(v.qr_temporal);
-                                                    setNombreQR(v.nombre);
-                                                    setPlacaQR(v.placa || '');
-                                                }}>
-                                                ver QR
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                <div className='card'>
+                    <div className="top-bar">
+                        <h3>Pendiente de entrada ({pendientesFiltrados.length})</h3>
+                        <input 
+                            placeholder="Buscar pendiente..." 
+                            className="input-filtro" 
+                            value={busquedaPendientes}
+                            onChange={(e) => setBusquedaPendientes(e.target.value)}
+                            style={{ maxWidth: '200px' }}
+                        />
                     </div>
-                )}
+                    {pendientesFiltrados.length === 0 ? (
+                        <p style={{ color: 'var(--text-dim)' }}>No hay pendientes que coincidan.</p>
+                    ) : (
+                        <div className="tabla-contenedor">
+                            <table className='tabla'>
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Documento</th>
+                                        <th>Placa</th>
+                                        <th>Vehiculo</th>
+                                        <th>Registrado</th>
+                                        <th>QR</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {pendientesFiltrados.map(v => (
+                                        <tr key={v.id}>
+                                            <td>{v.nombre}</td>
+                                            <td>{v.documento || '-'}</td>
+                                            <td>{v.placa || '-'} </td>
+                                            <td>{v.tipo_vehiculo} {v.marca} {v.modelo}</td>
+                                            <td>{new Date(v.fecha_entrada).toLocaleString()}</td>
+                                            <td>
+                                                <button className='btn btn-primary btn-sm'
+                                                    onClick={() => {
+                                                        setQrGenerado(v.qr_temporal);
+                                                        setNombreQR(v.nombre);
+                                                        setPlacaQR(v.placa || '');
+                                                    }}>
+                                                    ver QR
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <button className='btn btn-danger btn-sm'
+                                                    onClick={() => eliminarVisitante(v.id, v.nombre)}>
+                                                    🗑️ Eliminar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
 
                 {/* Visitantes adentro  */}
                 <div className='card'>
-                    <h3 style={{ marginBottom: '16px' }}>Visitantes actualmente adentro ({adentro.length})</h3>
-                    {adentro.length === 0 ? (
-                        <p style={{ color: '#888' }}>No hay visitantes actualmente.</p>
+                    <div className="top-bar">
+                        <h3>Visitantes actualmente adentro ({adentroFiltrados.length})</h3>
+                        <input 
+                            placeholder="Buscar adentro..." 
+                            className="input-filtro" 
+                            value={busquedaAdentro}
+                            onChange={(e) => setBusquedaAdentro(e.target.value)}
+                            style={{ maxWidth: '200px' }}
+                        />
+                    </div>
+                    {adentroFiltrados.length === 0 ? (
+                        <p style={{ color: 'var(--text-dim)' }}>No hay visitantes adentro que coincidan.</p>
                     ) : (
                         <div className='tabla-contenedor'>
                             <table className='tabla'>
@@ -416,7 +475,7 @@ export default function Visitantes() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {adentro.map(v => (
+                                    {adentroFiltrados.map(v => (
                                         <tr key={v.id}>
                                             <td>{v.nombre}</td>
                                             <td>{v.documento || '-'}</td>

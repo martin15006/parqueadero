@@ -101,8 +101,8 @@ const getTodosVehiculos = async (req, res) => {
     try {
 
         const { buscar } = req.query;
-        let query = `SELECT v.id, v.marca, v.modelo, v.color, v.tipo,
-            u.nombre, u.email
+        let query = `SELECT v.id, v.placa, v.marca, v.modelo, v.color, v.tipo, v.qr_code,
+            u.nombre as propietario, u.email
             FROM vehiculos v
             JOIN usuarios u ON v.usuario_id = u.id`;
 

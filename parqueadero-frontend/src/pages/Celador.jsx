@@ -145,7 +145,10 @@ export default function Celador() {
             )}
 
             <div className="pagina">
-                <h1>Panel Celador</h1>
+                <div className="glyph-divider"><span>ᛟ</span></div>
+                <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Panel Celador</h1>
+                <div className="glyph-divider" style={{ marginBottom: '3rem' }}><span>✦</span></div>
+
                 {error && <div className="alerta alerta-error">{error}</div>}
                 {exito && <div className="alerta alerta-exito">{exito}</div>}
 
@@ -200,48 +203,61 @@ export default function Celador() {
                             )}
                         </div>
 
-                        <h3 style={{ marginBottom: '20px' }}>Informacion del {vehiculo.esVisitante ? 'Visitante' : 'Propietario'}</h3>
-                        <div className='filtros-grid' style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-
-                            <div className="tabla-contenedor">
-                                <h4 style={{ marginBottom: '12px', color: '#4361ee' }}>
-                                    {vehiculo.esVisitante ? 'Visitante' : 'Propietario'}
-                                </h4>
-                                <div className='tabla-contenedor'>
-                                    <table className="tabla">
+                        {/* Títulos de sección dentro del panel */}
+                        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                            <h3 style={{ color: 'var(--gold)', fontFamily: 'var(--font-title)', fontSize: '1.4rem' }}>
+                                {vehiculo.esVisitante ? 'VISITANTE DETECTADO' : 'USUARIO REGISTRADO'}
+                            </h3>
+                            <div className="glyph-divider" style={{ maxWidth: '200px', margin: '10px auto' }}><span>✦</span></div>
+                        </div>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
+                            {/* Panel de Datos del Sujeto */}
+                            <div className="system-panel" style={{ 
+                                alignItems: 'flex-start', 
+                                padding: '24px',
+                                background: 'linear-gradient(165deg, rgba(91, 27, 175, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%)',
+                                borderLeft: '4px solid var(--purple-glow)'
+                            }}>
+                                <div className="label" style={{ color: 'var(--purple-glow)', fontWeight: 'bold' }}>
+                                    👤 PERFIL DEL {vehiculo.esVisitante ? 'VISITANTE' : 'PROPIETARIO'}
+                                </div>
+                                <div className="tabla-contenedor" style={{ width: '100%', border: 'none', background: 'transparent' }}>
+                                    <table className="tabla" style={{ width: '100%' }}>
                                         <tbody>
-                                            <tr><td><strong>Nombre</strong></td><td>{vehiculo.nombre}</td></tr>
-                                            <tr><td><strong>Apellido</strong></td><td>{vehiculo.apellido || '-'}</td></tr>
-                                            <tr><td><strong>Cedula</strong></td><td>{vehiculo.esVisitante ? (vehiculo.documento || '-') : (vehiculo.cedula || '-')}</td></tr>
-                                            <tr><td><strong>Telefono</strong></td><td>{vehiculo.telefono || '-'}</td></tr>
-
-                                            <tr><td><strong>correo</strong></td><td>{vehiculo.esVisitante ? (vehiculo.correo || '-') : (vehiculo.email || '-')}</td></tr>
-                                            {vehiculo.esVisitante && (
-                                                <tr><td><strong>Descripcion</strong></td><td>{vehiculo.descripcion || '-'}</td></tr>
-                                            )}
-
+                                            <tr><td style={{ color: 'var(--gold-dim)', width: '40%', fontSize: '0.8rem', textTransform: 'uppercase' }}>Nombre</td><td style={{ color: '#fff', fontSize: '1.1rem' }}>{vehiculo.nombre}</td></tr>
+                                            <tr><td style={{ color: 'var(--gold-dim)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Apellido</td><td style={{ color: '#fff', fontSize: '1.1rem' }}>{vehiculo.apellido || '-'}</td></tr>
+                                            <tr><td style={{ color: 'var(--gold-dim)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Identificación</td><td style={{ color: '#fff', fontSize: '1.1rem' }}>{vehiculo.esVisitante ? (vehiculo.documento || '-') : (vehiculo.cedula || '-')}</td></tr>
+                                            <tr><td style={{ color: 'var(--gold-dim)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Contacto</td><td style={{ color: '#fff', fontSize: '1.1rem' }}>{vehiculo.telefono || '-'}</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
-                            {/* datos del vehiculo  */}
-                            <div>
-                                <h4 style={{ marginBottom: '12px', color: '#4488e1' }}>Vehiculo</h4>
-                                <div className="tabla-contenedor">
-                                    <table className="tabla">
+
+                            {/* Panel del Vehículo (Estilo Modal) */}
+                            <div className="system-panel" style={{ 
+                                alignItems: 'flex-start', 
+                                padding: '24px',
+                                background: 'linear-gradient(165deg, rgba(201, 168, 76, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%)',
+                                borderLeft: '4px solid var(--gold)'
+                            }}>
+                                <div className="label" style={{ color: 'var(--gold)', fontWeight: 'bold' }}>
+                                    🚗 ESPECIFICACIONES DE LA MONTURA
+                                </div>
+                                <div className="tabla-contenedor" style={{ width: '100%', border: 'none', background: 'transparent' }}>
+                                    <table className="tabla" style={{ width: '100%' }}>
                                         <tbody>
-                                            <tr><td><strong>Placa</strong></td><td>{vehiculo.placa || '-'}</td></tr>
-                                            <tr><td><strong>Tipo</strong></td><td>{vehiculo.tipo_vehiculo || vehiculo.tipo || '-'}</td></tr>
-                                            <tr><td><strong>Marca</strong></td><td>{vehiculo.marca || '-'}</td></tr>
-                                            <tr><td><strong>Modelo</strong></td><td>{vehiculo.modelo || '-'}</td></tr>
-                                            <tr><td><strong>Color</strong></td><td>{vehiculo.color || vehiculo.descripcion || '-'}</td></tr>
+                                            <tr><td style={{ color: 'var(--gold-dim)', width: '40%', fontSize: '0.8rem', textTransform: 'uppercase' }}>Placa</td><td style={{ color: 'var(--gold)', fontWeight: 'bold', fontSize: '1.7rem', textShadow: '0 0 10px rgba(201,168,76,0.5)' }}>{vehiculo.placa || '-'}</td></tr>
+                                            <tr><td style={{ color: 'var(--gold-dim)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Tipo</td><td style={{ color: '#fff', fontSize: '1.1rem' }}>{vehiculo.tipo_vehiculo || vehiculo.tipo || '-'}</td></tr>
+                                            <tr><td style={{ color: 'var(--gold-dim)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Marca / Modelo</td><td style={{ color: '#fff', fontSize: '1.1rem' }}>{vehiculo.marca || '-'} {vehiculo.modelo || '-'}</td></tr>
+                                            <tr><td style={{ color: 'var(--gold-dim)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Apariencia</td><td style={{ color: '#fff', fontSize: '1.1rem' }}>{vehiculo.color || vehiculo.descripcion || '-'}</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '12px' }}>
+                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                             {vehiculo.esVisitante ? (
                                 vehiculo.estado === 'pendiente' ? (
                                     // Visitantes pendiente- solo puede entrar 
@@ -295,7 +311,7 @@ export default function Celador() {
                             ) : (
                                 // para usuarios registrados, mostrar entrada y salida 
                                 <>
-                                    <div style={{ overflow: 'auto', width: '100%' }}>
+                                    <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
                                         <button className="btn btn-success" style={{ flex: 1, padding: '14px' }}
                                             onClick={() => registrarMovimiento('entrada')}>
                                             Registrar Entrada

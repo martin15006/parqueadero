@@ -32,7 +32,7 @@ export default function Navbar() {
 
             {/* menu desplegable */}
             {menuAbierto && (
-                <div style={{ width: '100%', backgroud: 'rgba(0,0,0,0.3)', padding: '8px 0', borderTop: '1px solid rgba(255,255,255,02)' }}>
+                <div className="navbar-menu" style={{ width: '100%', backgroud: 'rgba(0,0,0,0.3)', padding: '8px 0', borderTop: '1px solid rgba(255,255,255,02)' }}>
                     {usuario.role === 'admin' && (
                         <Link to='/admin' onClick={() => setMenuAbierto(false)}
                             style={{ display: 'block', padding: '12px 20px', color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>

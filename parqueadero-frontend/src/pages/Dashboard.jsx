@@ -91,7 +91,9 @@ export default function Dashboard() {
         <>
             <Navbar />
             < div className="pagina">
-                <h1>Mis vehiculos</h1>
+                <div className="glyph-divider"><span>ᛟ</span></div>
+                <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Mis Vehículos</h1>
+                <div className="glyph-divider" style={{ marginBottom: '3rem' }}><span>✦</span></div>
 
                 {error && <div className="alerta alerta-error">{error}</div>}
                 {exito && <div className="alerta alerta-exito">{exito}</div>}
@@ -131,13 +133,27 @@ export default function Dashboard() {
                 </div>
 
                 {qrActual && (
-                    <div className="card" style={{ textAlign: 'center' }}>
-                        <h3 style={{ marginBottom: '16px' }}>Tu codigo QR</h3>
-                        <p style={{ marginBottom: '16px', color: '#666' }}>
-                            Muestra este QR al celador para registrar tu entrada
-                        </p>
-                        <img src={qrActual} alt="QR code" style={{ width: '200px', height: '200px' }} />
-                        <h2 style={{ marginBottom: '16px' }}>{PlacaActual}</h2>
+                    <div className="modal-overlay" onClick={() => setQrActual('')}>
+                        <div className="modal-rpg" onClick={e => e.stopPropagation()}>
+                            <button className="modal-cerrar" onClick={() => setQrActual('')}>&times;</button>
+                            <h3 style={{ marginBottom: '16px', color: 'var(--gold)' }}>Tu Código QR</h3>
+                            <div className="glyph-divider"><span>✦</span></div>
+                            <p style={{ marginBottom: '16px', color: 'var(--text-dim)', fontStyle: 'italic' }}>
+                                Muestra este QR al celador para registrar tu entrada
+                            </p>
+                            <div style={{ background: 'white', padding: '10px', display: 'inline-block', borderRadius: '4px' }}>
+                                <img src={qrActual} alt="QR code" style={{ width: '200px', height: '200px', display: 'block' }} />
+                            </div>
+                            <h2 style={{ margin: '16px 0', color: 'var(--gold)', fontFamily: 'var(--font-title)' }}>{PlacaActual}</h2>
+                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                                <button className="btn btn-success" onClick={() => descargarQR(qrActual, PlacaActual)}>
+                                    📥 Descargar
+                                </button>
+                                <button className="btn btn-danger" onClick={() => setQrActual('')}>
+                                    Cerrar
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -173,7 +189,8 @@ export default function Dashboard() {
                                                 <button className="btn btn-primary btn-sm" onClick={() => {
                                                     setQrActual(v.qr_code);
                                                     setPlacaActual(v.placa);
-                                                }}>Ver QR
+                                                }}>
+                                                    👁️ Ver QR
                                                 </button>
                                             </td>
                                             <td>
@@ -203,9 +220,9 @@ export default function Dashboard() {
                     )}
                 </div>
                 {vehiculoEditando && (
-                    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', }}>
-                        <div style={{ background: 'white', padding: '32px', borderRadius: '12px', width: '440px', maxWidth: '95vw' }}>
-                            <h3 style={{ marginBottom: '20px' }}>Editar Vehículo - {vehiculoEditando.placa}</h3>
+                    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                        <div className="card" style={{ width: '440px', maxWidth: '95vw', clipPath: 'none', borderRadius: '0', border: '2px solid var(--gold)' }}>
+                            <h3 style={{ marginBottom: '20px', textAlign: 'center' }}>Editar Vehículo - {vehiculoEditando.placa}</h3>
                             {error && <div className="alerta alerta-error">{error}</div>}
                             <form onSubmit={handleEditar}>
                                 <div className="form-grupo">
@@ -234,7 +251,7 @@ export default function Dashboard() {
                             </form>
                         </div>
                     </div>
-                )};
+                )}
             </div>
         </>
     );

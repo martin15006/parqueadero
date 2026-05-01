@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { registrarVisitantes, getVisitantes, registrarEntradaVisitante, registrarSalidaVisitante, buscarVisitantePorPlaca, registrarEntradaById, buscarVisitantePorNombre } = require('../controllers/visitantesController');
+const { registrarVisitantes, getVisitantes, registrarEntradaVisitante, registrarSalidaVisitante, buscarVisitantePorPlaca, registrarEntradaById, buscarVisitantePorNombre, eliminarVisitante } = require('../controllers/visitantesController');
 const { verificarToken, verificarRol } = require('../middlewares/authMiddleware');
 
 // el admin puede registrar a los visitantes y verlos 
 router.post('/', verificarToken, verificarRol('admin'), registrarVisitantes);
 router.get('/', verificarToken, verificarRol('admin'), getVisitantes);
+router.delete('/:id', verificarToken, verificarRol('admin'), eliminarVisitante);
 
 // celador y admin pueden registrar entradas y salidas de visitantes 
 router.post('/entrada-qr', verificarToken, verificarRol('admin', 'celador'), registrarEntradaVisitante);
