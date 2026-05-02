@@ -11,12 +11,35 @@ export default function Landing() {
                     PARQUEADERO
                 </span>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                    <button className="btn" onClick={() => navigate('/login')} style={{ clipPath: 'none', borderRadius: '4px' }}>
-                        Iniciar Sesion
+
+                    <button
+                        className="btn"
+                        onClick={() => navigate('/login')}
+                        style={{
+                            clipPath: 'none',
+                            borderRadius: '20px',
+                            border: '1px solid rgba(201,168,76,0.4)',
+                            color: 'var(--gold)',
+                            background: 'linear-gradient(135deg, #bdb6a4ff, #9e937aff)',
+                        }}
+                    >
+                        Iniciar Sesión
                     </button>
-                    <button className="btn btn-primary" onClick={() => navigate('/register')} style={{ clipPath: 'none', borderRadius: '4px' }}>
+
+                    <button
+                        className="btn"
+                        onClick={() => navigate('/register')}
+                        style={{
+                            clipPath: 'none',
+                            borderRadius: '20px',
+                            border: '1px solid rgba(201,168,76,0.4)',
+                            color: 'var(--gold)',
+                            background: 'linear-gradient(135deg, #bdb6a4ff, #9e937aff)',
+                        }}
+                    >
                         Registrarse
                     </button>
+
                 </div>
             </nav>
 
@@ -40,10 +63,10 @@ export default function Landing() {
                     Control inteligente de entradas y salidas mediante código QR. Olvidate de los tramites en papel eso ya es cosa del pasado.
                 </p>
                 <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <button className="btn btn-primary" onClick={() => navigate('/register')} style={{ padding: '14px 36px', fontSize: '1.1rem' }}>
+                    <button className="btn btn-primary" onClick={() => navigate('/register')} style={{ padding: '14px 36px', fontSize: '1.1rem', borderRadius: '20px' }}>
                         Comenzar ahora
                     </button>
-                    <button className="btn" onClick={() => navigate('/login')} style={{ padding: '14px 36px', fontSize: '1.1rem' }}>
+                    <button className="btn" onClick={() => navigate('/login')} style={{ padding: '14px 36px', fontSize: '1.1rem', borderRadius: '20px' }}>
                         Ya tengo cuenta
                     </button>
                 </div>

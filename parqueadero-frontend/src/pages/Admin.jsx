@@ -317,7 +317,7 @@ export default function Admin() {
                             </thead>
                             <tbody>
                                 {usuarios.map(u => (
-                                    <tr key={u.id}>
+                                            <tr key={u.id}>
                                         <td>{u.nombre?.trim()}</td>
                                         <td>{u.email?.trim()}</td>
                                         <td>{u.role}</td>
@@ -326,14 +326,21 @@ export default function Admin() {
                                             <select
                                                 value={u.role}
                                                 onChange={async (e) => {
+                                                    const nuevoRol = e.target.value;
                                                     try {
-                                                        await api.put(`/usuarios/${u.id}/rol`, { role: e.target.value });
+                                                        await api.put(`/usuarios/${u.id}/rol`, { role: nuevoRol });
+                                                        window.dispatchEvent(new CustomEvent('sistema:notificacion', { 
+                                                            detail: { 
+                                                                mensaje: `El Administrador ha bendecido a ${u.nombre} con el rango de ${nuevoRol.toUpperCase()}`,
+                                                                tipo: 'success'
+                                                            } 
+                                                        }));
                                                         cargarDatos();
                                                     } catch {
                                                         alert('Error al cambiar rol');
                                                     }
                                                 }}
-                                                style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ddd' }}
+                                                style={{ padding: '6px', borderRadius: '6px', border: '1px solid var(--gold-dim)', background: 'var(--void)', color: 'var(--text-body)' }}
                                             >
                                                 <option value="user">User</option>
                                                 <option value="celador">Celador</option>
