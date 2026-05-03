@@ -123,7 +123,7 @@ const registrarEntradaVisitante = async (req, res) => {
                 [datos.placa.toUpperCase().trim()]
             );
         } else {
-            [visitante] = await db.query(
+            [visitantes] = await db.query(
                 `SELECT * FROM visitantes WHERE nombre = ? AND estado = 'pendiente' ORDER BY fecha_entrada DESC LIMIT 1`,
                 [datos.nombre]
             );

@@ -51,7 +51,7 @@ const limpiarIntentosExpirados = async () => {
       'DELETE FROM intentos_login WHERE bloqueado_hasta < NOW() OR (bloqueado_hasta IS NULL AND ultimo_intento < DATE_SUB(NOW(), INTERVAL 1 HOUR))'
     );
     console.log('Intentos de login limpiados');
-  }catch (error){
+  } catch (error) {
     console.log('Error limpiando intentos:', error);
   }
 };
@@ -63,5 +63,5 @@ limpiarIntentosExpirados()
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`servidor corriendo en http://192.168.18.5:3000`);
+  console.log(`servidor corriendo en http://localhost:${PORT}`);
 });

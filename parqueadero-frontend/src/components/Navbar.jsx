@@ -18,25 +18,46 @@ export default function Navbar() {
     // 🔊 Audio optimizado (no se crea cada vez)
     const audioRef = useRef(null);
 
-    useEffect(() => {
-        audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
-        audioRef.current.volume = 0.4;
-    }, []);
+    const listenerRef = useRef(false);
 
     useEffect(() => {
+        if (listenerRef.current) return; // evita duplicados
+        listenerRef.current = true;
+
         const handleNotif = (e) => {
             setNotificacion(e.detail);
 
+            const sonidos = [
+                '/sound1.mp3',
+                '/sound2.mp3',
+                '/sound3.mp3',
+                '/sound4.mp3',
+                '/sound5.mp3',
+            ];
+
+            const sonidoAleatorio = sonidos[Math.floor(Math.random() * sonidos.length)];
+
+            // detener audio anterior
             if (audioRef.current) {
+                audioRef.current.pause();
                 audioRef.current.currentTime = 0;
-                audioRef.current.play().catch(() => { });
             }
+
+            const nuevoAudio = new Audio(sonidoAleatorio);
+            nuevoAudio.volume = 0.4;
+            nuevoAudio.play().catch(() => { });
+
+            audioRef.current = nuevoAudio;
 
             setTimeout(() => setNotificacion(null), 5000);
         };
 
         window.addEventListener('sistema:notificacion', handleNotif);
-        return () => window.removeEventListener('sistema:notificacion', handleNotif);
+
+        return () => {
+            window.removeEventListener('sistema:notificacion', handleNotif);
+            listenerRef.current = false;
+        };
     }, []);
 
     const logout = () => {

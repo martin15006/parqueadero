@@ -94,3 +94,20 @@ CREATE TABLE IF NOT EXISTS visitantes (
   FOREIGN KEY (celador_entrada_id) REFERENCES usuarios(id) ON DELETE SET NULL,
   FOREIGN KEY (celador_salida_id) REFERENCES usuarios(id) ON DELETE SET NULL
 );
+
+-- Tabla de configuración del parqueadero
+CREATE TABLE IF NOT EXISTS configuracion_parqueadero (
+  id INT PRIMARY KEY DEFAULT 1,
+  espacios_carros INT DEFAULT 50,
+  espacios_motos INT DEFAULT 30,
+  espacios_otros INT DEFAULT 5,
+  parqueadero_activo BOOLEAN DEFAULT TRUE,
+  motivo_cierre VARCHAR(255) NULL
+);
+
+-- Insertar configuración inicial
+INSERT INTO configuracion_parqueadero 
+  (id, espacios_carros, espacios_motos, espacios_otros, parqueadero_activo)
+VALUES 
+  (1, 50, 30, 5, TRUE)
+ON DUPLICATE KEY UPDATE id = id;
