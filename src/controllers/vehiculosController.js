@@ -1,5 +1,7 @@
 const db = require('../config/db');
 const QRcode = require('qrcode');
+const { registrarLog } = require('../utils/logger');
+
 
 // añadir vehiculo y crear el qr 
 const crearVehiculo = async (req, res) => {
@@ -43,6 +45,18 @@ const crearVehiculo = async (req, res) => {
             vehiculo_id: resultado.insertId,
             qr_code: qrImagen
         });
+
+        await registrarLog({
+            usuario_id: usuario_id,
+            usuario_nombre: req.usuario.nombre || '',
+            usuario_role: req.usuario.role,
+            accion: 'REGISTRO_VEHICULO',
+            descripcion: `Nuevo vehículo registrado: ${placa} (${marca} ${modelo})`,
+            datos_nuevos: { placa, marca, modelo, color, tipo },
+            ip: req.ip,
+            tipo: 'info'
+        });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ mensaje: 'error en el servidor' });
@@ -129,6 +143,17 @@ const eliminarVehiculo = async (req, res) => {
         await db.query('DELETE FROM vehiculos WHERE id = ?', [id]);
         res.json({ mensaje: 'Vehículo eliminado exitosamente' });
 
+        await registrarLog({
+            usuario_id: req.usuario.id,
+            usuario_nombre: req.usuario.nombre || '',
+            usuario_role: req.usuario.role,
+            accion: 'ELIMINACION_VEHICULO',
+            descripcion: `Vehículo eliminado: ${vehiculo.placa}`,
+            datos_anteriores: { placa: vehiculo.placa, marca: vehiculo.marca },
+            ip: req.ip,
+            tipo: 'critico'
+        });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ mensaje: 'Error en el servidor' });
@@ -159,6 +184,20 @@ const editarVehiculo = async (req, res) => {
         )
 
         res.json({ mensaje: 'Vehiculo actualizado exitosamente', vehiculo: actualizado[0] });
+
+        const anterior = vehiculos[0];
+        await registrarLog({
+            usuario_id: req.usuario.id,
+            usuario_nombre: req.usuario.nombre || '',
+            usuario_role: req.usuario.role,
+            accion: 'EDICION_VEHICULO',
+            descripcion: `Vehículo ${anterior.placa} editado`,
+            datos_anteriores: { marca: anterior.marca, modelo: anterior.modelo, color: anterior.color, tipo: anterior.tipo },
+            datos_nuevos: { marca, modelo, color, tipo },
+            ip: req.ip,
+            tipo: 'info'
+        });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ mensaje: 'Error en el servidor' });

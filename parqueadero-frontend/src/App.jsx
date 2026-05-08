@@ -11,6 +11,7 @@ import MiHistorial from "./pages/MiHistorial";
 import Visitantes from "./pages/Visitantes";
 import Landing from "./pages/Landing";
 import Parqueadero from "./pages/Parqueadero";
+import Logs from "./pages/logs";
 
 function RutaProtegida({ children, roles }) {
   const token = localStorage.getItem('token');
@@ -59,6 +60,7 @@ export default function App() {
         <Route path="/mi-historial" element={<RutaProtegida roles={['admin', 'celador', 'user']}><MiHistorial /></RutaProtegida>} />
         <Route path="/parqueadero" element={<RutaProtegida roles={['admin', 'celador', 'user']}><Parqueadero /></RutaProtegida>} />
         <Route path="/visitantes" element={<RutaProtegida roles={['admin']}><Visitantes /></RutaProtegida>} />
+        <Route path="/logs" element={<RutaProtegida roles={['admin']}><Logs /></RutaProtegida>} />
       </Routes>
     </BrowserRouter>
   );

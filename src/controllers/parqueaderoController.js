@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { registrarLog } = require('../utils/logger');
 
 const getEstadoParqueadero = async (req, res) => {
     try {
@@ -110,6 +111,17 @@ const actualizarConfiguracion = async (req, res) => {
         valores.push(1);
         await db.query(`UPDATE configuracion_parqueadero SET ${updates.join(', ')} WHERE id = ?`, valores);
         res.json({ mensaje: 'Configuracion actualizada' });
+
+        await registrarLog({
+            usuario_id: usaurio_id,
+            usuario_nombre: req.usuario.nombre || '',
+            usuario_role: req.usuario.role,
+            accion: 'CAMBIO_CAPACIDADES',
+            datos_nuevos: { espacios_carros, espacios_motos, espacios_otros },
+            ip: req.ip,
+            tipo: 'info'
+        });
+        
     } catch (error) {
         console.error(error);
         res.status(500).json({ mensaje: 'Error en el servidor' });
@@ -124,6 +136,19 @@ const toggleParqueadero = async (req, res) => {
             [activo, activo ? null : motivo_cierre]
         );
         res.json({ mensaje: activo ? 'Parqueadero habilitado' : 'Parqueadero deshabilitado' });
+
+        await registrarLog({
+            usuario_id: usuario_id,
+            usuario_nombre: req.usaurio.nombre || '',
+            usuario_role: req.usuario.role,
+            accion: activo ? 'PARQUEADERO_HABILITADO' : 'PARQUEADERO_DESHABILITADO',
+            descripcion: activo
+                ? 'Parqueadero habilitado'
+                : `Parqueadero deshabilitado. Motivo: ${motivo_cierre || 'Sin motivo'}`,
+            ip: req.ip,
+            tipo: 'critico'
+        });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ mensaje: 'Error en el servidor' });

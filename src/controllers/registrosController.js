@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { registrarLog } = require('../utils/logger');
 
 // registrar entrada o salida
 
@@ -109,6 +110,17 @@ const registrarMovimiento = async (req, res) => {
             }
         });
 
+        await registrarLog({
+            usuario_id: celador_id,
+            usuario_nombre: req.usuario.nombre || '',
+            usuario_role: req.usuario.role,
+            accion: tipo === 'entrada' ? 'ENTRADA_VEHICULO' : 'SALIDA_VEHICULO',
+            descripcion: `${tipo.toUpperCase()} registrada - placa: ${vehiculo.placa} | Propietario: ${vehiculo.nombre}`,
+            datos_nuevos: { placa: vehiculo.placa, tipo },
+            ip: req.ip,
+            tipo: 'exito'
+        });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ mensaje: 'Error en el servidor' });
@@ -192,6 +204,17 @@ const eliminarRegistro = async (req, res) => {
 
         await db.query('DELETE FROM registros WHERE id = ?', [id]);
         res.json({ mensaje: 'Registro eliminado y guardado en papelera' });
+
+        await registrarLog({
+            usuario_id: admin_id,
+            usuario_nombre: req.usuario.nombre || '',
+            usuario_role: req.usuario.role,
+            accion: 'ELIMINACION_REGISTROS',
+            descripcion: `Registro ID ${id} eliminado del historial`,
+            datos_anteriores: registros[0],
+            ip: req.ip,
+            tipo: 'critico'
+        });
 
     } catch (error) {
         console.error(error);

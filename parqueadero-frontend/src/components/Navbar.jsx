@@ -128,6 +128,12 @@ export default function Navbar() {
                         </Link>
                     )}
 
+                    {usuario.role == 'admin' && (
+                        <Link to='/logs' onClick={()=> setMenuAbierto(false)} className='nav-item'>
+                            📜 Logs
+                        </Link>
+                    )}
+
                     <button onClick={logout} className="nav-item logout">
                         Cerrar Sesión
                     </button>

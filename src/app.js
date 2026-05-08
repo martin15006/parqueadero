@@ -1,12 +1,32 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
 
-// Middlewares globales
+// Middlewares globales seguridad
+app.use(helmet());
 app.use(express.json());
 app.use(cors());
+
+// Rate limiting general
+const limiterGeneral = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  message: { mensaje: 'Demasiadas peticiones. Intenta más tarde.' }
+});
+
+// Rate limiting estricto para login 
+const limiterLogin = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  message: { mensaje: 'Demaciados intentos de login. Esperera 15 minutos.' }
+});
+
+app.use(limiterGeneral);
+app.use('/auth/login', limiterLogin);
 
 // Rutas
 const authRoutes = require('./routes/authRoutes');
@@ -15,6 +35,7 @@ const registrosRoutes = require('./routes/registrosRoutes');
 const usuariosRoutes = require('./routes/usuariosRoutes');
 const visitantesRoutes = require('./routes/visitantesRoutes');
 const parqueaderoRoutes = require('./routes/parqueaderoRoutes');
+const logsRoutes = require('./routes/logsRoutes');
 
 app.use('/auth', authRoutes);
 app.use('/vehiculos', vehiculosRoutes);
@@ -22,6 +43,7 @@ app.use('/registros', registrosRoutes);
 app.use('/usuarios', usuariosRoutes);
 app.use('/visitantes', visitantesRoutes);
 app.use('/parqueadero', parqueaderoRoutes);
+app.use('/logs', logsRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {

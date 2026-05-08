@@ -111,3 +111,18 @@ INSERT INTO configuracion_parqueadero
 VALUES 
   (1, 50, 30, 5, TRUE)
 ON DUPLICATE KEY UPDATE id = id;
+
+CREATE TABLE IF NOT EXISTS logs_auditoria (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NULL,
+    usuario_nombre VARCHAR(100) NULL,
+    usuario_role VARCHAR(20) NULL,
+    accion VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    datos_anteriores TEXT NULL,
+    datos_nuevos TEXT NULL,
+    ip VARCHAR(45) NULL,
+    tipo ENUM('info', 'exito', 'error', 'critico') DEFAULT 'info',
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
+);

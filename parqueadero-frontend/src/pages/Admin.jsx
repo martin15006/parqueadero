@@ -22,7 +22,7 @@ export default function Admin() {
     const [paginaActual, setPaginaActual] = useState(1);
     const [qrActual, setQrActual] = useState('');
     const [placaActual, setPlacaActual] = useState('');
-    const registrosPorPagina = 10;
+    const registrosPorPagina = 15;
 
     useEffect(() => {
         const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');

@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
+const { registrarLog } = require('../utils/logger');
 
 const getUsuarios = async (req, res) => {
     try {
@@ -30,6 +31,17 @@ const cambiarRol = async (req, res) => {
         }
         await db.query('UPDATE usuarios SET role = ? WHERE id = ?', [role, id]);
         res.json({ mensaje: 'Rol actualizado exitosamente' });
+
+        await registrarLog({
+            usuario_id: req.usuario.id,
+            usuario_nombre: req.usuario.nombre || 'Admin',
+            usuario_role: req.usuario.role,
+            accion: 'CAMBIO_ROL',
+            descripcion: `Cambio de rol del usuario ID ${id} a ${role}`,
+            datos_nuevos: { usuario_id: id, nuevo_rol: role },
+            ip: req.ip,
+            tipo: 'critico'
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ mensaje: 'Error en el servidor' })
@@ -75,6 +87,25 @@ const actualizarPerfil = async (req, res) => {
             [nombre, apellido, telefono, passwordFinal, id]
         );
         res.json({ mensaje: 'Perfil actualizado exitosamente' });
+        
+        const camposModificados = [];
+        if (nombre !== usuario.nombre) camposModificados.push(`nombre: ${usuario.nombre} = ${nombre}`);
+        if (apellido !== usuario.apellido) camposModificados.push(`apellido: ${usuario.apellido} = ${apellido}`);
+        if (telefono !== usuario.telefono) camposModificados.push(`telefono: ${usuario.telefono} = ${telefono}`);
+        if (passwordNueva) camposModificados.push(`contraseña: [actualizada]`);
+
+        await registrarLog({
+            usuario_id: id,
+            usuario_nombre: usuario.nombre,
+            usuario_role: usuario.role,
+            accion: 'EDICION_PERFIL',
+            descripcion: `Perfil editado. Cambios: ${camposModificados.join(', ')}`,
+            datos_anteriores: { nombre: usuario.nombre, apellido: usuario.apellido, telefono: usuario.telefono },
+            datos_nuevos: { nombre, apellido, telefono },
+            ip: req.ip,
+            tipo: 'info'
+        });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ mensaje: 'Error en el servidor' });
