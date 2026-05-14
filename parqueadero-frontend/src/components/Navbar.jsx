@@ -129,10 +129,14 @@ export default function Navbar() {
                     )}
 
                     {usuario.role == 'admin' && (
-                        <Link to='/logs' onClick={()=> setMenuAbierto(false)} className='nav-item'>
+                        <Link to='/logs' onClick={() => setMenuAbierto(false)} className='nav-item'>
                             📜 Logs
                         </Link>
                     )}
+
+                    <Link to='/configuracion' onClick={() => setMenuAbierto(false)} className='nav-item'>
+                        ⚙️ Configuración
+                    </Link>
 
                     <button onClick={logout} className="nav-item logout">
                         Cerrar Sesión

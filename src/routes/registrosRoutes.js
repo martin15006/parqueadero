@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { registrarMovimiento, verHistorial,eliminarRegistro, getEstadisticas, getHistorialUsuario } = require('../controllers/registrosController');
+const { registrarMovimiento, verHistorial,eliminarRegistro, getEstadisticas, getHistorialUsuario, registrarSalidaEmergencia } = require('../controllers/registrosController');
 const {verificarToken, verificarRol} = require('../middlewares/authMiddleware');
 
 // celador y admin pueden registrar los movimientos
 
 router.post('/', verificarToken, verificarRol('admin','celador'), registrarMovimiento);
+
+router.post('/emergencia', verificarToken, verificarRol('admin'), registrarSalidaEmergencia)
 
 // solo el admin ve el historial completo
 router.get('/', verificarToken, verificarRol('admin'),verHistorial);

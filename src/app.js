@@ -9,7 +9,15 @@ const app = express();
 // Middlewares globales seguridad
 app.use(helmet());
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://192.168.18.5:5173',
+    'https://coronary-partner-bartender.ngrok-free.dev'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Rate limiting general
 const limiterGeneral = rateLimit({
@@ -80,6 +88,22 @@ const limpiarIntentosExpirados = async () => {
 
 setInterval(limpiarIntentosExpirados, 60 * 60 * 1000);
 limpiarIntentosExpirados()
+
+
+const limpiarLogsViejos = async () => {
+  try {
+    const db = require('./config/db');
+    await db.query(
+      `DELETE FROM logs_auditoria WHERE fecha < DATE_SUB(NOW(), INTERVAL 90 DAY)`
+    );
+    console.log('📋 Logs viejos limpiados');
+  } catch (error) {
+    console.error('Error limpiando logs:', error);
+  }
+}
+
+setInterval(limpiarLogsViejos, 24 * 60 * 60 * 1000);
+limpiarLogsViejos();
 
 // Iniciar servidor - siempre al final
 const PORT = process.env.PORT || 3000;

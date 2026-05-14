@@ -22,6 +22,11 @@ export default function Admin() {
     const [paginaActual, setPaginaActual] = useState(1);
     const [qrActual, setQrActual] = useState('');
     const [placaActual, setPlacaActual] = useState('');
+    const [modalEmergencia, setModalEmergencia] = useState(false);
+    const [placaEmergencia, setPlacaEmergencia] = useState('');
+    const [motivoEmergencia, setMotivoEmergencia] = useState('');
+    const [errorEmergencia, setErrorEmergencia] = useState('');
+    const [exitoEmergencia, setExitoEmergencia] = useState('');
     const registrosPorPagina = 15;
 
     useEffect(() => {
@@ -201,11 +206,69 @@ export default function Admin() {
         doc.save(`historial_parqueadero_${new Date().toLocaleDateString()}.pdf`);
     };
 
+    const registrarSalidaEmergencia = async () => {
+        setErrorEmergencia('');
+        if (!placaEmergencia.trim())
+            return setErrorEmergencia('Ingresa la placa del vehículo');
+        if (!motivoEmergencia.trim())
+            return SetMotivoEmergecnia('El motivo es obligatorio');
+        try {
+            await api.post('/registros/emergencia', {
+                placa: placaEmergencia.toUpperCase(),
+                motivo: motivoEmergencia
+            });
+            setExitoEmergencia('Salida de emergencia registrada');
+            setModalEmergencia(false);
+            setPlacaEmergencia('');
+            setMotivoEmergencia('');
+            cargarDatos();
+            setTimeout(() => setExitoEmergencia(''), 4000);
+        } catch (err) {
+            setErrorEmergencia(err.response?.data?.mensaje || 'Error al registrar');
+        }
+    };
+
     return (
 
 
         <>
             <Navbar />
+            {/* Modal de emergencia  */}
+            {modalEmergencia && (
+                <div className="modal-everlay" onClick={() => setModalEmergencia(false)}>
+                    <div className="modal-rpg" onClick={e => e.stopPropagation()}>
+                        <button className="modal-cerrar" onClick={() => setModalEmergencia(false)}>&time;</button>
+                        <h3 style={{ color: 'var(--gold)', marginBottom: '12px' }}>🩸Salida de Emergencia🩸</h3>
+                        <div className="glyph-divider"><span>✦</span></div>
+                        {errorEmergencia && <div className="alerta alerta-error">{errorEmergencia}</div>}
+                        <div className="form-grupo" style={{ textaling: 'left', marginTop: '16px' }}>
+                            <label>Placa del vehículo *</label>
+                            <input value={placaEmergencia}
+                                onChange={e => setPlacaEmergencia(e.target.value.toUpperCase())}
+                                placeholder="ABC123" />
+                        </div>
+                        <div className="form-grupo" style={{ textAling: 'left' }}>
+                            <label>Motivo de la salida</label>
+                            <textarea value={motivoEmergencia}
+                                onChange={e => setMotivoEmergencia(e.target.value)}
+                                placeholder="Describe el motivo de la salida de emergencia..."
+                                style={{
+                                    width: '100%', minHeight: '80px', padding: '10px',
+                                    background: 'rgba(0,0,0,0.3', border: '1px solid var(--gold-dim)',
+                                    color: 'var(text-body)', resize: 'none'
+                                }} />
+                        </div>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button className="btn btn-danger" style={{ flex: 1 }} onClick={registrarSalidaEmergencia}>
+                                Confirmar Salida
+                            </button>
+                            <button className="btn btn-warning" style={{ flex: 1 }} onClick={() => setModalEmergencia(false)}>
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="pagina">
                 <div className="glyph-divider"><span>ᛟ</span></div>
                 <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Panel del Administrador</h1>
@@ -233,6 +296,14 @@ export default function Admin() {
                             ))}
                         </div>
 
+                        {exitoEmergencia && <div className="alerta alerta-exito">{exitoEmergencia}</div>}
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+                            <button className="btn btn-danger" style={{ width: 'auto' }}
+                                onClick={() => setModalEmergencia(true)}>
+                                ☠️ Salida de Emergencia ☠️
+                            </button>
+                        </div>
+
                         {/* exportar el Excel  */}
                         <h3>Historial de entradas y salidas</h3>
 
@@ -258,10 +329,10 @@ export default function Admin() {
                                         <CartesianGrid strokeDasharray='3 3' stroke="rgba(201, 168, 76, 0.1)" vertical={false} />
                                         <XAxis dataKey='dia' tick={{ fontSize: 12, fill: 'var(--silver)' }} axisLine={{ stroke: 'var(--gold-dim)' }} />
                                         <YAxis allowDecimals={false} tick={{ fill: 'var(--silver)' }} axisLine={{ stroke: 'var(--gold-dim)' }} />
-                                        <Tooltip 
-                                            contentStyle={{ 
-                                                backgroundColor: 'var(--void)', 
-                                                border: '1px solid var(--gold)', 
+                                        <Tooltip
+                                            contentStyle={{
+                                                backgroundColor: 'var(--void)',
+                                                border: '1px solid var(--gold)',
                                                 borderRadius: '0',
                                                 color: 'var(--text-body)',
                                                 fontFamily: 'var(--font-body)'
@@ -317,7 +388,7 @@ export default function Admin() {
                             </thead>
                             <tbody>
                                 {usuarios.map(u => (
-                                            <tr key={u.id}>
+                                    <tr key={u.id}>
                                         <td>{u.nombre?.trim()}</td>
                                         <td>{u.email?.trim()}</td>
                                         <td>{u.role}</td>
@@ -329,11 +400,11 @@ export default function Admin() {
                                                     const nuevoRol = e.target.value;
                                                     try {
                                                         await api.put(`/usuarios/${u.id}/rol`, { role: nuevoRol });
-                                                        window.dispatchEvent(new CustomEvent('sistema:notificacion', { 
-                                                            detail: { 
+                                                        window.dispatchEvent(new CustomEvent('sistema:notificacion', {
+                                                            detail: {
                                                                 mensaje: `El Administrador ha bendecido a ${u.nombre} con el rango de ${nuevoRol.toUpperCase()}`,
                                                                 tipo: 'success'
-                                                            } 
+                                                            }
                                                         }));
                                                         cargarDatos();
                                                     } catch {
@@ -361,7 +432,7 @@ export default function Admin() {
                         </table>
                     </div>
                 </div>
-                
+
                 <div className="card">
                     <div className="top-bar">
                         <h3>Todos los vehículos</h3>
@@ -383,57 +454,57 @@ export default function Admin() {
                     <div className="tabla-contenedor">
                         <table className="tabla">
                             <thead>
-                                        <tr>
-                                            <th>Placa</th>
-                                            <th>Tipo</th>
-                                            <th>Marca</th>
-                                            <th>Modelo</th>
-                                            <th>Color</th>
-                                            <th>Propietario</th>
-                                            <th>Email</th>
-                                            <th>QR</th>
-                                            <th>Eliminar</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {vehiculos.map(v => (
-                                            <tr key={v.id}>
-                                                <td style={{ color: 'var(--gold)', fontWeight: 'bold' }}>{v.placa?.trim()}</td>
-                                                <td>{v.tipo?.trim()}</td>
-                                                <td>{v.marca?.trim()}</td>
-                                                <td>{v.modelo?.trim()}</td>
-                                                <td>{v.color?.trim()}</td>
-                                                <td>{v.propietario?.trim()}</td>
-                                                <td>{v.email?.trim()}</td>
-                                                <td>
-                                                     <button className="btn btn-primary btn-sm" onClick={() => {
-                                                         setQrActual(v.qr_code);
-                                                         setPlacaActual(v.placa);
-                                                     }}>
-                                                         👁️ Ver QR
-                                                     </button>
-                                                 </td>
-                                                <td>
-                                                    <button
-                                                        className="btn btn-danger btn-sm"
-                                                        onClick={async () => {
-                                                            if (window.confirm(`¿Eliminar vehículo ${v.placa}?`)) {
-                                                                try {
-                                                                    await api.delete(`/vehiculos/${v.id}`);
-                                                                    cargarDatos();
-                                                                } catch {
-                                                                    alert('Error al eliminar');
-                                                                }
-                                                            }
-                                                        }}
-                                                    >
-                                                        <span className="btn-text">Eliminar</span>
-                                                        <span className="btn-icon">🗑️</span>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
+                                <tr>
+                                    <th>Placa</th>
+                                    <th>Tipo</th>
+                                    <th>Marca</th>
+                                    <th>Modelo</th>
+                                    <th>Color</th>
+                                    <th>Propietario</th>
+                                    <th>Email</th>
+                                    <th>QR</th>
+                                    <th>Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {vehiculos.map(v => (
+                                    <tr key={v.id}>
+                                        <td style={{ color: 'var(--gold)', fontWeight: 'bold' }}>{v.placa?.trim()}</td>
+                                        <td>{v.tipo?.trim()}</td>
+                                        <td>{v.marca?.trim()}</td>
+                                        <td>{v.modelo?.trim()}</td>
+                                        <td>{v.color?.trim()}</td>
+                                        <td>{v.propietario?.trim()}</td>
+                                        <td>{v.email?.trim()}</td>
+                                        <td>
+                                            <button className="btn btn-primary btn-sm" onClick={() => {
+                                                setQrActual(v.qr_code);
+                                                setPlacaActual(v.placa);
+                                            }}>
+                                                👁️ Ver QR
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button
+                                                className="btn btn-danger btn-sm"
+                                                onClick={async () => {
+                                                    if (window.confirm(`¿Eliminar vehículo ${v.placa}?`)) {
+                                                        try {
+                                                            await api.delete(`/vehiculos/${v.id}`);
+                                                            cargarDatos();
+                                                        } catch {
+                                                            alert('Error al eliminar');
+                                                        }
+                                                    }
+                                                }}
+                                            >
+                                                <span className="btn-text">Eliminar</span>
+                                                <span className="btn-icon">🗑️</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -529,24 +600,24 @@ export default function Admin() {
 
                     {totalPaginas > 1 && (
                         <div className="paginacion">
-                            <button 
-                                className="pag-item" 
+                            <button
+                                className="pag-item"
                                 onClick={() => setPaginaActual(p => Math.max(1, p - 1))}
                                 disabled={paginaActual === 1}
                             >
                                 &laquo;
                             </button>
                             {[...Array(totalPaginas)].map((_, i) => (
-                                <button 
-                                    key={i} 
+                                <button
+                                    key={i}
                                     className={`pag-item ${paginaActual === i + 1 ? 'active' : ''}`}
                                     onClick={() => setPaginaActual(i + 1)}
                                 >
                                     {i + 1}
                                 </button>
                             ))}
-                            <button 
-                                className="pag-item" 
+                            <button
+                                className="pag-item"
                                 onClick={() => setPaginaActual(p => Math.min(totalPaginas, p + 1))}
                                 disabled={paginaActual === totalPaginas}
                             >

@@ -279,14 +279,20 @@ const getEstadisticas = async (req, res) => {
     }
 };
 
+
+
 const getHistorialUsuario = async (req, res) => {
     try {
         const usuario_id = req.usuario.id;
-        const { fecha_inicio, fecha_fin } = req.query;
+        const { fecha_inicio, fecha_fin, placa } = req.query;
 
         let condiciones = ['(v.usuario_id = ? OR r.placa_referencia IN (SELECT placa FROM vehiculos where usuario_id = ?))'];
         let valores = [usuario_id, usuario_id];
 
+        if (placa) {
+            condiciones.push(`(v.placa LIKE ? OR ? r.placa_referencia LIKE ?)`);
+            valores.push(`%${placa}%`, `%${placa}%`);
+        }
         if (fecha_inicio && fecha_fin) {
             condiciones.push('r.fecha BETWEEN ? AND ?');
             valores.push(
@@ -325,6 +331,53 @@ const getHistorialUsuario = async (req, res) => {
         console.error(error);
         res.status(500).json({ mensaje: 'Error en el servidor' });
     }
+}
+
+const registrarSalidaEmergencia = async (req, res) => {
+    try {
+        const { placa, motivo } = req.body;
+        const admin_id = req.usuario.id;
+
+        if (!motivo || !motivo.trim()) {
+            return res.status(400).json({ mensaje: 'El motivo es obligatorio' });
+        }
+
+        const [vehiculos] = await db.query(
+            `SELECT v.*, u.nombre FROM vehiculos v
+            JOIN usuarios u ON v.usuario_id = u.id
+            WHERE v.placa = ?`, [placa]
+        );
+
+        if (vehiculos.length === 0) {
+            return res.status(404).json({ mensaje: 'Vehiculo no encontrado' });
+        }
+
+        const vehivulo = vehiculos[0];
+
+        await admin_id.query(
+            `INSERT INTO registros (vehiculo_id, celador_id, tipo, placa_referencia,
+            propietario_referencia, marca_referencia, modelo_regerencia)
+            VALUES (?,?,'salida',?,?,?,?)`,
+            [vehiculo.id, admin_id, vehiculo.placa, vehiculo.nombre, vehiculo.marca, vehiculo.modelo]
+        );
+
+        await registrarLog({
+            usuario_id: admin_id,
+            usuario_nombre: req.usuario.nombre || '',
+            usuario_role: req.usuario.role,
+            accion: 'SALIDA_EMERGENCIA',
+            descripcion: `Salida de emergencia - placa: ${placa}| Motivo: ${motivo}`,
+            datos_nuevos: { placa, motivo },
+            ip: req.ip,
+            tipo: 'critico'
+        });
+
+        res.json({ mensaje: 'Salida de emergencia registrada' });
+    } catch (error) {
+        console.error(error);
+        res.stastus(500).json({ menasje: 'Error en el servidor ' })
+    }
+
 };
 
-module.exports = { registrarMovimiento, verHistorial, eliminarRegistro, getEstadisticas, getHistorialUsuario };
+module.exports = { registrarMovimiento, verHistorial, eliminarRegistro, getEstadisticas, getHistorialUsuario, registrarSalidaEmergencia };

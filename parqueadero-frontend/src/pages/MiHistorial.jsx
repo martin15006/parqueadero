@@ -5,19 +5,20 @@ import api from '../api/axios';
 
 export default function MiHistorial() {
     const [historial, setHistorial] = useState([]);
-    const [filtros, setFiltros] = useState({ fecha_inicio: '', fecha_fin: '' });
+    const [filtros, setFiltros] = useState({ fecha_inicio: '', fecha_fin: '', placa: '' });
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
         cargarHistorial();
-    }, [filtros]);
+    }, []);
 
     const cargarHistorial = async () => {
         try {
             const params = new URLSearchParams();
             if (filtros.fecha_inicio) params.append('fecha_inicio', filtros.fecha_inicio);
             if (filtros.fecha_fin) params.append('fecha_fin', filtros.fecha_fin);
+            if (filtros.placa) params.append('placa', filtros.placa);
             const res = await api.get(`/registros/mi-historial?${params.toString()}`);
             setHistorial(res.data);
         } catch {
@@ -29,27 +30,37 @@ export default function MiHistorial() {
         <>
             <Navbar />
             <div className='pagina'>
-                <h1>Mi Historial de Accesos</h1>
+                <div className='glyph-divider'><span>ᛟ</span></div>
+                <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Mi Historial de Accesos</h1>
+                <div className='glyph-divider' style={{ marginBottom: '3rem' }}><span>✦</span></div>
                 {error && <div className='alerta alerta-error'>{error}</div>}
 
                 <div className='card'>
-                    <h3 style={{ marginBottom: '16px' }}>Filtrar por fecha</h3>
+                    <h3 style={{ marginBottom: '16px' }}>Filtros</h3>
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                        <div className='form-grupo' style={{margin: 0}}>
+                            <label>Placa</label>
+                            <input placeholder='ABC123' value={filtros.placa}
+                            onChange={e=> setFiltros({...filtros, placa: e.target.value.toUpperCase()})}
+                            className='input-filtro' />
+                        </div>
                         <div className='form-grupo' style={{ margin: 0 }}>
                             <label>Desde</label>
                             <input type='date' value={filtros.fecha_inicio}
                                 onChange={e => setFiltros({ ...filtros, fecha_inicio: e.target.value })}
-                                style={{ padding: '8px 12px' }} />
+                                className='input-filtro' />
                         </div>
                         <div className='form-grupo' style={{ margin: 0 }}>
                             <label>Hasta</label>
                             <input type='date' value={filtros.fecha_fin}
                                 onChange={e => setFiltros({ ...filtros, fecha_fin: e.target.value })}
-                                style={{ padding: '8px 12px' }} />
+                                className='input-filtro' />
                         </div>
 
-                        <button className='btn btn-primary btn-sm' onClick={() => {
-                            setFiltros({ fecha_inicio: '', fecha_fin: '' });
+                        <button className='btn btn-primary' onClick={cargarHistorial} style={{width: 'auto', marginTop:0}}>Filtrar</button>
+                        <button className='btn btn-warning' onClick={() => {
+                            setFiltros({ fecha_inicio: '', fecha_fin: '', placa: ''});
+                            setTimeout(cargarHistorial, 100);
                         }} style={{ width: 'auto', marginTop: 0, height: '4em' }}>
                             Limpiar
                         </button>
@@ -59,10 +70,10 @@ export default function MiHistorial() {
                 <div className='card'>
                     <div className='top-bar'>
                         <h3>Mis accesos al parqueadero</h3>
-                        <span style={{ color: '#888', fontSize: '0.9rem' }}>{historial.length} registros</span>
+                        <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>{historial.length} registros</span>
                     </div>
                     {historial.length === 0 ? (
-                        <p style={{ color: '#888', textAlign: 'center', padding: '20px' }}>No hay registros de acceso.</p>
+                        <p style={{ color: 'var(--text-dim)', textAlign: 'center', padding: '20px' }}>No hay registros de acceso.</p>
                     ) : (
                         <div className='tabla-contenedor'>
                             <table className='tabla'>
